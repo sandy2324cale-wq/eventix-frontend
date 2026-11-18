@@ -22,7 +22,8 @@ import {
   UbicacionAdmin,
   EventoAdmin,
   UbicacionRequest,
-  ApelacionAdmin
+  ApelacionAdmin,
+  AuditoriaAdmin
 } from '../../core/services/admin';
 
 // ==========================================
@@ -36,6 +37,7 @@ type SeccionAdmin =
   | 'apelaciones'
   | 'ubicaciones'
   | 'eventos'
+  | 'auditoria'
   | 'configuracion';
 
 @Component({
@@ -68,6 +70,12 @@ export class Admin implements OnInit {
   // DATOS DEL BACKEND
   // ==========================================
 
+  auditorias = signal<AuditoriaAdmin[]>([]);
+  paginaAuditorias = signal(0);
+  totalAuditorias = signal(0);
+  totalPaginasAuditorias = signal(0);
+  cargandoAuditorias = signal(false);
+  errorAuditorias = signal('');
   usuarios = signal<UsuarioAdmin[]>([]);
   apelaciones = signal<ApelacionAdmin[]>([]);
   totalApelaciones = signal(0);
@@ -186,6 +194,10 @@ export class Admin implements OnInit {
   cambiarSeccion(seccion: SeccionAdmin): void {
 
     this.seccion.set(seccion);
+
+    if (seccion === 'auditoria') {
+      this.cargarAuditorias(0);
+    }
     this.menuAbierto.set(false);
 
     this.limpiarMensajes();
@@ -200,6 +212,7 @@ export class Admin implements OnInit {
       apelaciones: 'Apelaciones de cuentas',
       ubicaciones: 'Gestión de ubicaciones',
       eventos: 'Gestión de eventos',
+      auditoria: 'Auditoría del sistema',
       configuracion: 'Configuración'
     };
 
@@ -233,6 +246,9 @@ export class Admin implements OnInit {
     this.cargarApelaciones();
     this.cargarUbicaciones();
     this.cargarEventos();
+    if (this.seccion() === 'auditoria') {
+      this.cargarAuditorias(this.paginaAuditorias());
+    }
   }
 
   // ==========================================
@@ -635,6 +651,40 @@ export class Admin implements OnInit {
   // CERRAR SESIÓN
   // ==========================================
 
+  cargarAuditorias(page = 0): void {
+    this.cargandoAuditorias.set(true);
+    this.errorAuditorias.set('');
+
+    this.adminService
+      .listarAuditorias(page, this.tamanoPagina)
+      .subscribe({
+        next: respuesta => {
+          this.auditorias.set(respuesta.content);
+          this.paginaAuditorias.set(respuesta.number);
+          this.totalAuditorias.set(respuesta.totalElements);
+          this.totalPaginasAuditorias.set(respuesta.totalPages);
+          this.cargandoAuditorias.set(false);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.cargandoAuditorias.set(false);
+          this.errorAuditorias.set(
+            err.error?.message ||
+            'No se pudo consultar la auditoría.'
+          );
+        }
+      });
+  }
+
+  cambiarPaginaAuditoria(pagina: number): void {
+    if (
+      pagina < 0 ||
+      pagina >= this.totalPaginasAuditorias()
+    ) {
+      return;
+    }
+
+    this.cargarAuditorias(pagina);
+  }
   cerrarSesion(): void {
 
     this.auth.cerrarSesion();

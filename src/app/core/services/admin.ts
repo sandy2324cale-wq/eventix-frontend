@@ -32,6 +32,16 @@ export interface ApelacionAdmin {
   estado: 'PENDIENTE' | 'APROBADA' | 'RECHAZADA';
   fechaSolicitud: string; fechaResolucion: string | null; respuestaAdmin: string | null;
 }
+export interface AuditoriaAdmin {
+  id: number;
+  usuarioId: number | null;
+  usuarioCorreo?: string | null;
+  accion: string;
+  entidad: string;
+  registroId: number;
+  fecha: string;
+  detalle: string | null;
+}
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private readonly http = inject(HttpClient);
@@ -69,5 +79,15 @@ export class AdminService {
   resolverApelacion(id: number, aprobar: boolean, respuesta: string): Observable<ApelacionAdmin> {
     const accion = aprobar ? 'aprobar' : 'rechazar';
     return this.http.patch<ApelacionAdmin>(`${this.api}/apelaciones/${id}/${accion}`, { respuesta });
+  }
+
+  listarAuditorias(
+    page = 0,
+    size = 10
+  ): Observable<Pagina<AuditoriaAdmin>> {
+    return this.http.get<Pagina<AuditoriaAdmin>>(
+      `${this.api}/auditorias`,
+      { params: { page, size } }
+    );
   }
 }

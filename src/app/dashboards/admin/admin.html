@@ -69,6 +69,11 @@
         <span>▤</span> Eventos
       </button>
 
+      <button
+        [class.activo]="seccion() === 'auditoria'"
+        (click)="cambiarSeccion('auditoria')">
+        <span>☷</span> Auditoría
+      </button>
       <div class="sidebar-label secundaria">PREFERENCIAS</div>
 
       <button
@@ -659,6 +664,104 @@
       </section>
     }
 
+    @if (seccion() === 'auditoria') {
+
+      <section class="panel">
+
+        <div class="panel-cabecera">
+          <div>
+            <h2>Auditoría del sistema</h2>
+            <p>Historial de operaciones realizadas en Eventix.</p>
+          </div>
+
+          <button
+            class="boton-secundario"
+            [disabled]="cargandoAuditorias()"
+            (click)="cargarAuditorias(paginaAuditorias())">
+            Actualizar
+          </button>
+        </div>
+
+        @if (errorAuditorias()) {
+          <div class="alerta error">
+            {{ errorAuditorias() }}
+          </div>
+        }
+
+        @if (cargandoAuditorias()) {
+          <p>Cargando registros...</p>
+        } @else {
+
+          <div class="tabla-contenedor">
+            <table>
+              <thead>
+                <tr>
+                  <th>Fecha</th>
+                  <th>Usuario</th>
+                  <th>Acción</th>
+                  <th>Entidad</th>
+                  <th>Registro</th>
+                  <th>Detalle</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (a of auditorias(); track a.id) {
+                  <tr>
+                    <td>
+                      {{ a.fecha | date:'dd/MM/yyyy HH:mm' }}
+                    </td>
+
+                    <td>
+                      {{ a.usuarioCorreo || (a.usuarioId != null ? 'Usuario #' + a.usuarioId : 'Sistema') }}
+                    </td>
+
+                    <td>
+                      <span class="estado rol">
+                        {{ a.accion }}
+                      </span>
+                    </td>
+
+                    <td>{{ a.entidad }}</td>
+
+                    <td>#{{ a.registroId }}</td>
+
+                    <td>{{ a.detalle || '-' }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="6" class="sin-resultados">
+                      No existen registros de auditoría.
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="paginacion">
+            <button
+              [disabled]="paginaAuditorias() === 0"
+              (click)="cambiarPaginaAuditoria(paginaAuditorias() - 1)">
+              Anterior
+            </button>
+
+            <span>
+              Página {{ paginaAuditorias() + 1 }}
+              de {{ totalPaginasAuditorias() || 1 }}
+              · {{ totalAuditorias() }} registros
+            </span>
+
+            <button
+              [disabled]="paginaAuditorias() + 1 >= totalPaginasAuditorias()"
+              (click)="cambiarPaginaAuditoria(paginaAuditorias() + 1)">
+              Siguiente
+            </button>
+          </div>
+        }
+
+      </section>
+    }
     @if (seccion() === 'configuracion') {
 
       <section class="panel configuracion">
