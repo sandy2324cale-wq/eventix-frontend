@@ -1,0 +1,78 @@
+
+.accesibilidad {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1000;
+}
+
+.boton-flotante {
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  background: var(--morado);
+  color: white;
+  font-size: 1.7rem;
+  cursor: pointer;
+  box-shadow: 0 8px 28px rgba(118, 56, 232, 0.35);
+}
+
+.panel {
+  width: min(320px, calc(100vw - 48px));
+  margin-bottom: 14px;
+  padding: 20px;
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  background: var(--superficie);
+  color: var(--texto);
+  box-shadow: var(--sombra);
+}
+
+.panel-cabecera,
+.opcion,
+.controles-letra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panel-cabecera {
+  margin-bottom: 22px;
+}
+
+.opcion {
+  margin-bottom: 20px;
+}
+
+.opcion span {
+  font-size: 0.9rem;
+}
+
+.panel button:not(.restablecer) {
+  padding: 8px 12px;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: var(--superficie-secundaria);
+  color: var(--texto);
+  cursor: pointer;
+}
+
+.controles-letra {
+  gap: 8px;
+}
+
+.controles-letra strong {
+  font-size: 0.85rem;
+}
+
+.restablecer {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: var(--morado-suave);
+  color: var(--texto);
+  cursor: pointer;
+}

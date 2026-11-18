@@ -1,0 +1,95 @@
+@use '../../shared/auth';
+
+/* APELACIONES */
+
+.auth-apelacion-enlace,
+.auth-bloqueo-alerta {
+  margin-top: 22px;
+  padding: 18px;
+  border-radius: 14px;
+  background: rgba(144, 103, 247, 0.07);
+  border: 1px solid rgba(144, 103, 247, 0.23);
+}
+
+.auth-apelacion-enlace {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.auth-apelacion-texto strong,
+.auth-bloqueo-alerta strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.auth-apelacion-texto p,
+.auth-bloqueo-alerta p {
+  margin: 8px 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--texto-secundario, #aaa5bd);
+}
+
+.auth-apelacion-icono {
+  font-size: 22px;
+  color: #b69aff;
+}
+
+.auth-apelacion-boton,
+.auth-bloqueo-boton {
+  display: inline-block;
+  padding: 11px 15px;
+  border-radius: 9px;
+  background: #8658ed;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.auth-apelacion-boton:hover,
+.auth-bloqueo-boton:hover {
+  background: #996eff;
+}
+
+.auth-bloqueo-alerta {
+  border-color: rgba(235, 76, 96, 0.3);
+  background: rgba(235, 76, 96, 0.07);
+}
+
+.auth-bloqueo-alerta strong {
+  color: #f19aa5;
+}
+
+.auth-bloqueo-boton {
+  margin-top: 12px;
+}
+
+@media (max-width: 480px) {
+  .auth-apelacion-boton,
+  .auth-bloqueo-boton {
+    display: block;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+/* Enlaces compactos de ayuda */
+.auth-enlaces-compactos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 8px;
+  font-size: 12px;
+  text-align: center;
+}
+.auth-enlaces-compactos a { color: #bc9cff; text-decoration: none; }
+.auth-enlaces-compactos a:hover { text-decoration: underline; }
+.auth-enlaces-compactos a:last-child { flex-basis: 100%; margin-top: 3px; }
+.auth-enlaces-compactos span { color: #716780; }

@@ -1,0 +1,793 @@
+
+<div class="admin-layout">
+
+  <button
+    class="menu-movil"
+    type="button"
+    (click)="menuAbierto.set(!menuAbierto())"
+    aria-label="Abrir menú">
+    ☰
+  </button>
+
+  @if (menuAbierto()) {
+    <div
+      class="menu-fondo"
+      (click)="menuAbierto.set(false)">
+    </div>
+  }
+
+  <aside class="sidebar" [class.abierto]="menuAbierto()">
+
+    <div class="marca">
+      <div class="marca-icono">E</div>
+
+      <div>
+        <h2>EVENTIX</h2>
+        <span>ADMINISTRACIÓN</span>
+      </div>
+    </div>
+
+    <div class="sidebar-label">MENÚ PRINCIPAL</div>
+
+    <nav class="menu">
+
+      <button
+        [class.activo]="seccion() === 'resumen'"
+        (click)="cambiarSeccion('resumen')">
+        <span>▦</span> Resumen general
+      </button>
+
+      <button
+        [class.activo]="seccion() === 'solicitudes'"
+        (click)="cambiarSeccion('solicitudes')">
+        <span>✓</span> Solicitudes
+        @if (totalSolicitudes() > 0) {
+          <small>{{ totalSolicitudes() }}</small>
+        }
+      </button>
+
+      <button
+        [class.activo]="seccion() === 'usuarios'"
+        (click)="cambiarSeccion('usuarios')">
+        <span>♙</span> Usuarios
+      </button>
+
+      <button [class.activo]="seccion() === 'apelaciones'" (click)="cambiarSeccion('apelaciones')">
+        <span>✉</span> Apelaciones
+        @if (totalApelaciones() > 0) { <small>{{ totalApelaciones() }}</small> }
+      </button>
+
+      <button
+        [class.activo]="seccion() === 'ubicaciones'"
+        (click)="cambiarSeccion('ubicaciones')">
+        <span>⌖</span> Ubicaciones
+      </button>
+
+      <button
+        [class.activo]="seccion() === 'eventos'"
+        (click)="cambiarSeccion('eventos')">
+        <span>▤</span> Eventos
+      </button>
+
+      <div class="sidebar-label secundaria">PREFERENCIAS</div>
+
+      <button
+        [class.activo]="seccion() === 'configuracion'"
+        (click)="cambiarSeccion('configuracion')">
+        <span>⚙</span> Configuración
+      </button>
+
+    </nav>
+
+    <div class="sidebar-pie">
+      <div class="perfil-admin">
+        <div class="avatar">A</div>
+        <div>
+          <strong>Administrador</strong>
+          <span>Control general</span>
+        </div>
+      </div>
+
+      <button class="salir" (click)="cerrarSesion()">
+        Cerrar sesión
+      </button>
+    </div>
+
+  </aside>
+
+  <main class="contenido">
+
+    <header class="encabezado">
+      <div>
+        <span class="subtitulo">EVENTIX / ADMIN</span>
+        <h1>{{ nombreSeccion() }}</h1>
+        <p>Gestiona y supervisa tu plataforma de eventos.</p>
+      </div>
+
+      <div class="encabezado-acciones">
+        <span class="indicador-admin">● Administrador</span>
+
+        <button
+          class="boton-icono"
+          title="Actualizar datos"
+          (click)="cargarTodo()">
+          ↻
+        </button>
+      </div>
+    </header>
+
+    @if (error()) {
+      <div class="alerta error" role="alert">
+        {{ error() }}
+        <button (click)="error.set('')">×</button>
+      </div>
+    }
+
+    @if (mensaje()) {
+      <div class="alerta exito" role="status">
+        {{ mensaje() }}
+        <button (click)="mensaje.set('')">×</button>
+      </div>
+    }
+
+    @if (seccion() === 'resumen') {
+
+      <section class="estadisticas">
+
+        <article class="estadistica">
+          <span class="estadistica-icono">♙</span>
+          <p>Usuarios registrados</p>
+          <h2>{{ totalUsuarios() }}</h2>
+          <span class="detalle">Total en el sistema</span>
+        </article>
+
+        <article class="estadistica">
+          <span class="estadistica-icono morado">◷</span>
+          <p>Solicitudes pendientes</p>
+          <h2>{{ totalSolicitudes() }}</h2>
+          <span class="detalle">Por revisar</span>
+        </article>
+
+        <article class="estadistica">
+          <span class="estadistica-icono azul">▤</span>
+          <p>Eventos registrados</p>
+          <h2>{{ totalEventos() }}</h2>
+          <span class="detalle">Todos los estados</span>
+        </article>
+
+        <article class="estadistica">
+          <span class="estadistica-icono verde">⌖</span>
+          <p>Ubicaciones</p>
+          <h2>{{ totalUbicaciones() }}</h2>
+          <span class="detalle">Registradas</span>
+        </article>
+
+      </section>
+
+      <section class="panel">
+
+        <div class="panel-cabecera">
+          <div>
+            <h2>Solicitudes recientes</h2>
+            <p>Organizadores que esperan aprobación.</p>
+          </div>
+
+          <button
+            class="boton-secundario"
+            (click)="cambiarSeccion('solicitudes')">
+            Ver todas
+          </button>
+        </div>
+
+        @if (solicitudes().length === 0) {
+          <div class="vacio">
+            <div class="vacio-icono">✓</div>
+            <h3>No hay solicitudes pendientes</h3>
+            <p>Las nuevas solicitudes aparecerán aquí.</p>
+          </div>
+        } @else {
+          <div class="tabla-contenedor">
+            <table>
+              <thead>
+                <tr>
+                  <th>Organización</th>
+                  <th>Correo</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (s of solicitudes(); track s.id) {
+                  <tr>
+                    <td><strong>{{ s.nombre }}</strong></td>
+                    <td>{{ s.correo }}</td>
+                    <td>
+                      <span class="estado pendiente">
+                        {{ s.estado }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="acciones-tabla">
+                        <button
+                          class="boton-aprobar"
+                          [disabled]="procesando()"
+                          (click)="aprobar(s)">
+                          Aprobar
+                        </button>
+
+                        <button
+                          class="boton-rechazar"
+                          [disabled]="procesando()"
+                          (click)="abrirRechazo(s)">
+                          Rechazar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+      </section>
+
+      <section class="acciones-rapidas">
+        <h2>Accesos rápidos</h2>
+
+        <div class="rapidos-grid">
+          <button (click)="cambiarSeccion('solicitudes')">
+            <span>✓</span>
+            <strong>Revisar solicitudes</strong>
+            <small>Aprobar organizadores</small>
+          </button>
+
+          <button (click)="cambiarSeccion('usuarios')">
+            <span>♙</span>
+            <strong>Ver usuarios</strong>
+            <small>Consultar cuentas</small>
+          </button>
+
+          <button (click)="cambiarSeccion('ubicaciones')">
+            <span>⌖</span>
+            <strong>Supervisar ubicaciones</strong>
+            <small>Consultar lugares de eventos</small>
+          </button>
+        </div>
+      </section>
+    }
+
+    @if (seccion() === 'solicitudes') {
+
+      <section class="panel">
+
+        <div class="panel-cabecera">
+          <div>
+            <h2>Organizadores pendientes</h2>
+            <p>Aprueba o rechaza las solicitudes registradas.</p>
+          </div>
+
+          <button
+            class="boton-secundario"
+            (click)="cargarSolicitudes(paginaSolicitudes())">
+            Actualizar
+          </button>
+        </div>
+
+        @if (solicitudes().length === 0) {
+          <div class="vacio">
+            <div class="vacio-icono">✓</div>
+            <h3>Todo está al día</h3>
+            <p>No existen solicitudes pendientes de aprobación.</p>
+          </div>
+        } @else {
+
+          <div class="tabla-contenedor">
+            <table>
+              <thead>
+                <tr>
+                  <th>Organización</th>
+                  <th>Contacto</th>
+                  <th>RUC</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (s of solicitudes(); track s.id) {
+                  <tr>
+                    <td>
+                      <strong>{{ s.nombre }}</strong>
+                      <small>ID: {{ s.id }}</small>
+                    </td>
+
+                    <td>
+                      {{ s.correo }}
+                      <small>{{ s.telefono }}</small>
+                    </td>
+
+                    <td>{{ s.ruc || 'No registrado' }}</td>
+
+                    <td>
+                      <span class="estado pendiente">
+                        {{ s.estado }}
+                      </span>
+                    </td>
+
+                    <td>
+                      <div class="acciones-tabla">
+                        <button
+                          class="boton-aprobar"
+                          [disabled]="procesando()"
+                          (click)="aprobar(s)">
+                          Aprobar
+                        </button>
+
+                        <button
+                          class="boton-rechazar"
+                          [disabled]="procesando()"
+                          (click)="abrirRechazo(s)">
+                          Rechazar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="paginacion">
+            <button
+              [disabled]="paginaSolicitudes() === 0"
+              (click)="cambiarPagina('solicitudes', paginaSolicitudes() - 1)">
+              Anterior
+            </button>
+
+            <span>
+              Página {{ paginaSolicitudes() + 1 }}
+              de {{ totalPaginasSolicitudes() }}
+            </span>
+
+            <button
+              [disabled]="paginaSolicitudes() + 1 >= totalPaginasSolicitudes()"
+              (click)="cambiarPagina('solicitudes', paginaSolicitudes() + 1)">
+              Siguiente
+            </button>
+          </div>
+        }
+
+      </section>
+    }
+
+    @if (seccion() === 'usuarios') {
+
+      <section class="panel">
+
+        <div class="panel-cabecera">
+          <div>
+            <h2>Usuarios registrados</h2>
+            <p>Consulta las cuentas de Eventix.</p>
+          </div>
+
+          <input
+            class="buscador"
+            placeholder="Buscar en esta página..."
+            [ngModel]="busquedaUsuarios"
+            (ngModelChange)="actualizarBusquedaUsuarios($event)">
+        </div>
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Verificación</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (u of usuariosFiltrados(); track u.id) {
+                <tr>
+                  <td>
+                    <strong>{{ u.nombre }} {{ u.apellidos }}</strong>
+                    <small>{{ u.cedula }}</small>
+                  </td>
+
+                  <td>{{ u.correo }}</td>
+
+                  <td>
+                    <span class="estado rol">{{ u.rol }}</span>
+                  </td>
+
+                  <td>
+                    <span
+                      class="estado"
+                      [class.aprobado]="u.correoVerificado"
+                      [class.pendiente]="!u.correoVerificado">
+                      {{ u.correoVerificado ? 'Verificado' : 'Pendiente' }}
+                    </span>
+                  </td>
+
+                  <td>
+                    <span
+                      class="estado"
+                      [class.aprobado]="u.activo"
+                      [class.rechazado]="!u.activo">
+                      {{ u.activo ? 'Activo' : (u.motivoBloqueo ? 'Bloqueado' : 'Inactivo') }}
+                    </span>
+                  </td>
+                  <td>
+                    @if (u.rol !== 'ADMIN') {
+                      @if (u.activo) {
+                        <button class="boton-rechazar" [disabled]="procesando()" (click)="abrirBloqueo(u)">Bloquear</button>
+                      } @else if (u.motivoBloqueo) {
+                        <button class="boton-aprobar" [disabled]="procesando()" (click)="desbloquearUsuario(u)">Desbloquear</button>
+                        <small title="Motivo de bloqueo">{{ u.motivoBloqueo }}</small>
+                      } @else { <small>Sin bloqueo administrativo</small> }
+                    } @else { <small>Cuenta protegida</small> }
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="sin-resultados">
+                    No se encontraron usuarios.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="paginacion">
+          <button
+            [disabled]="paginaUsuarios() === 0"
+            (click)="cambiarPagina('usuarios', paginaUsuarios() - 1)">
+            Anterior
+          </button>
+
+          <span>
+            Página {{ paginaUsuarios() + 1 }}
+            de {{ totalPaginasUsuarios() || 1 }}
+          </span>
+
+          <button
+            [disabled]="paginaUsuarios() + 1 >= totalPaginasUsuarios()"
+            (click)="cambiarPagina('usuarios', paginaUsuarios() + 1)">
+            Siguiente
+          </button>
+        </div>
+
+      </section>
+    }
+
+    @if (seccion() === 'apelaciones') {
+      <section class="panel">
+        <div class="panel-cabecera">
+          <div><h2>Apelaciones pendientes</h2><p>Revisa las solicitudes de cuentas bloqueadas.</p></div>
+          <button class="boton-secundario" (click)="cargarApelaciones(paginaApelaciones())">Actualizar</button>
+        </div>
+        <div class="tabla-contenedor">
+          <table>
+            <thead><tr><th>Usuario</th><th>Motivo de apelación</th><th>Fecha</th><th>Acciones</th></tr></thead>
+            <tbody>
+              @for (a of apelaciones(); track a.id) {
+                <tr>
+                  <td><strong>{{ a.correo }}</strong><small>Usuario #{{ a.usuarioId }}</small></td>
+                  <td class="motivo-largo">{{ a.motivo }}</td>
+                  <td>{{ a.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td><div class="acciones-tabla">
+                    <button class="boton-aprobar" [disabled]="procesando()" (click)="abrirResolverApelacion(a, true)">Aprobar</button>
+                    <button class="boton-rechazar" [disabled]="procesando()" (click)="abrirResolverApelacion(a, false)">Rechazar</button>
+                  </div></td>
+                </tr>
+              } @empty { <tr><td colspan="4" class="sin-resultados">No hay apelaciones pendientes.</td></tr> }
+            </tbody>
+          </table>
+        </div>
+        <div class="paginacion">
+          <button [disabled]="paginaApelaciones() === 0" (click)="cambiarPagina('apelaciones', paginaApelaciones() - 1)">Anterior</button>
+          <span>Página {{ paginaApelaciones() + 1 }} de {{ totalPaginasApelaciones() || 1 }}</span>
+          <button [disabled]="paginaApelaciones() + 1 >= totalPaginasApelaciones()" (click)="cambiarPagina('apelaciones', paginaApelaciones() + 1)">Siguiente</button>
+        </div>
+      </section>
+    }
+
+    @if (seccion() === 'ubicaciones') {
+
+      <section class="panel">
+
+        <div class="panel-cabecera">
+          <div>
+            <h2>Ubicaciones registradas</h2>
+            <p>Consulta los espacios registrados por los organizadores.</p>
+          </div>
+        </div>
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Ciudad</th>
+                <th>Dirección</th>
+                <th>Capacidad</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (u of ubicaciones(); track u.id) {
+                <tr>
+                  <td><strong>{{ u.nombre }}</strong></td>
+                  <td>{{ u.ciudad }}</td>
+                  <td>{{ u.direccion }}</td>
+                  <td>{{ u.capacidad }} personas</td>
+                  <td>
+                    <span
+                      class="estado"
+                      [class.aprobado]="u.activa"
+                      [class.rechazado]="!u.activa">
+                      {{ u.activa ? 'Activa' : 'Inactiva' }}
+                    </span>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="sin-resultados">
+                    Todavía no hay ubicaciones registradas.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="paginacion">
+          <button
+            [disabled]="paginaUbicaciones() === 0"
+            (click)="cambiarPagina('ubicaciones', paginaUbicaciones() - 1)">
+            Anterior
+          </button>
+
+          <span>
+            Página {{ paginaUbicaciones() + 1 }}
+            de {{ totalPaginasUbicaciones() || 1 }}
+          </span>
+
+          <button
+            [disabled]="paginaUbicaciones() + 1 >= totalPaginasUbicaciones()"
+            (click)="cambiarPagina('ubicaciones', paginaUbicaciones() + 1)">
+            Siguiente
+          </button>
+        </div>
+
+      </section>
+    }
+
+    @if (seccion() === 'eventos') {
+
+      <section class="panel">
+
+        <div class="panel-cabecera">
+          <div>
+            <h2>Eventos de Eventix</h2>
+            <p>Consulta los eventos registrados en la plataforma.</p>
+          </div>
+
+          <input
+            class="buscador"
+            placeholder="Buscar en esta página..."
+            [ngModel]="busquedaEventos"
+            (ngModelChange)="actualizarBusquedaEventos($event)">
+        </div>
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead>
+              <tr>
+                <th>Evento</th>
+                <th>Fecha de inicio</th>
+                <th>Aforo</th>
+                <th>Organizador</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (e of eventosFiltrados(); track e.id) {
+                <tr>
+                  <td>
+                    <strong>{{ e.titulo }}</strong>
+                    <small>Evento #{{ e.id }}</small>
+                  </td>
+
+                  <td>
+                    {{ e.fechaInicio | date:'dd/MM/yyyy HH:mm' }}
+                  </td>
+
+                  <td>{{ e.aforoMaximo }}</td>
+
+                  <td>#{{ e.organizadorId }}</td>
+
+                  <td>
+                    <span
+                      class="estado"
+                      [class.aprobado]="e.estado === 'PUBLICADO'"
+                      [class.pendiente]="e.estado === 'BORRADOR'"
+                      [class.rechazado]="e.estado === 'CANCELADO'">
+                      {{ e.estado }}
+                    </span>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="sin-resultados">
+                    Todavía no hay eventos registrados.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="paginacion">
+          <button
+            [disabled]="paginaEventos() === 0"
+            (click)="cambiarPagina('eventos', paginaEventos() - 1)">
+            Anterior
+          </button>
+
+          <span>
+            Página {{ paginaEventos() + 1 }}
+            de {{ totalPaginasEventos() || 1 }}
+          </span>
+
+          <button
+            [disabled]="paginaEventos() + 1 >= totalPaginasEventos()"
+            (click)="cambiarPagina('eventos', paginaEventos() + 1)">
+            Siguiente
+          </button>
+        </div>
+
+      </section>
+    }
+
+    @if (seccion() === 'configuracion') {
+
+      <section class="panel configuracion">
+        <div class="panel-cabecera">
+          <div>
+            <h2>Preferencias de accesibilidad</h2>
+            <p>Personaliza la visualización de Eventix.</p>
+          </div>
+        </div>
+
+        <div class="config-fila">
+          <div>
+            <h3>Tema de la aplicación</h3>
+            <p>Selecciona el modo de visualización.</p>
+          </div>
+
+          <div class="config-botones">
+            <button (click)="cambiarTema('oscuro')">
+              Oscuro
+            </button>
+            <button (click)="cambiarTema('claro')">
+              Claro
+            </button>
+            <button (click)="cambiarTema('sistema')">
+              Sistema
+            </button>
+          </div>
+        </div>
+
+        <div class="config-fila">
+          <div>
+            <h3>Tamaño del texto</h3>
+            <p>Ajusta el tamaño de letra.</p>
+          </div>
+
+          <div class="config-botones">
+            <button (click)="accesibilidad.disminuirLetra()">A−</button>
+            <button (click)="accesibilidad.restaurarLetra()">Normal</button>
+            <button (click)="accesibilidad.aumentarLetra()">A+</button>
+          </div>
+        </div>
+
+        <div class="config-fila">
+          <div>
+            <h3>Lectura por voz</h3>
+            <p>Activa o desactiva la lectura de descripciones.</p>
+          </div>
+
+          <button
+            class="boton-secundario"
+            (click)="accesibilidad.alternarLectura()">
+            {{ accesibilidad.vozActiva() ? 'Desactivar' : 'Activar' }}
+          </button>
+        </div>
+      </section>
+    }
+
+  </main>
+
+  @if (solicitudRechazo(); as solicitud) {
+    <div class="modal-fondo">
+      <div
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titulo-rechazo">
+
+        <h2 id="titulo-rechazo">Rechazar solicitud</h2>
+
+        <p>
+          Indica el motivo por el cual se rechaza
+          la organización <strong>{{ solicitud.nombre }}</strong>.
+        </p>
+
+        <label for="motivo">Motivo del rechazo</label>
+
+        <textarea
+          id="motivo"
+          rows="5"
+          maxlength="500"
+          [(ngModel)]="motivoRechazo"
+          placeholder="Escribe el motivo del rechazo...">
+        </textarea>
+
+        <small>{{ motivoRechazo.length }}/500 caracteres</small>
+
+        <div class="modal-acciones">
+          <button
+            class="boton-secundario"
+            [disabled]="procesando()"
+            (click)="cerrarRechazo()">
+            Cancelar
+          </button>
+
+          <button
+            class="boton-rechazar"
+            [disabled]="procesando() || !motivoRechazo.trim()"
+            (click)="confirmarRechazo()">
+            {{ procesando() ? 'Procesando...' : 'Confirmar rechazo' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (usuarioBloqueo(); as u) {
+    <div class="modal-fondo"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="titulo-bloqueo">
+      <h2 id="titulo-bloqueo">Bloquear cuenta</h2>
+      <p>Indica por qué se bloqueará a <strong>{{ u.nombre }} {{ u.apellidos }}</strong> ({{ u.correo }}).</p>
+      <label for="motivo-bloqueo">Motivo obligatorio</label>
+      <textarea id="motivo-bloqueo" rows="4" maxlength="500" [(ngModel)]="motivoBloqueo"></textarea>
+      <small>{{ motivoBloqueo.length }}/500</small>
+      <div class="modal-acciones">
+        <button class="boton-secundario" [disabled]="procesando()" (click)="usuarioBloqueo.set(null)">Cancelar</button>
+        <button class="boton-rechazar" [disabled]="procesando() || motivoBloqueo.trim().length < 5" (click)="confirmarBloqueo()">Confirmar bloqueo</button>
+      </div>
+    </div></div>
+  }
+  @if (apelacionResolver(); as a) {
+    <div class="modal-fondo"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="titulo-apelacion">
+      <h2 id="titulo-apelacion">{{ aprobarApelacion ? 'Aprobar' : 'Rechazar' }} apelación</h2>
+      <p><strong>{{ a.correo }}</strong>: {{ a.motivo }}</p>
+      <label for="respuesta-apelacion">Respuesta del administrador</label>
+      <textarea id="respuesta-apelacion" rows="4" maxlength="1000" [(ngModel)]="respuestaApelacion"></textarea>
+      <small>{{ respuestaApelacion.length }}/1000</small>
+      <div class="modal-acciones">
+        <button class="boton-secundario" [disabled]="procesando()" (click)="apelacionResolver.set(null)">Cancelar</button>
+        <button [class]="aprobarApelacion ? 'boton-aprobar' : 'boton-rechazar'" [disabled]="procesando() || respuestaApelacion.trim().length < 5" (click)="confirmarResolverApelacion()">Confirmar</button>
+      </div>
+    </div></div>
+  }
+</div>

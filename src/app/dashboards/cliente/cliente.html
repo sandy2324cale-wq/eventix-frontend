@@ -1,0 +1,870 @@
+
+<section class="panel-cliente">
+
+  <!-- MENÚ LATERAL -->
+  <aside
+    class="cliente-sidebar"
+    [class.abierto]="menuMovilAbierto()"
+    aria-label="Menú del cliente">
+
+    <div class="sidebar-cabecera">
+      <span class="marca">✦ eventix.</span>
+      <h2>Mi espacio</h2>
+      <p>Tu experiencia empieza aquí</p>
+    </div>
+
+    <nav class="sidebar-navegacion" aria-label="Secciones del cliente">
+      <button type="button"
+        [class.activo]="seccion() === 'inicio'"
+        (click)="cambiarSeccion('inicio')">
+        ⌂ <span>Inicio</span>
+      </button>
+
+      <button type="button"
+        [class.activo]="seccion() === 'entradas'"
+        (click)="cambiarSeccion('entradas')">
+        ▣ <span>Mis entradas</span>
+      </button>
+
+      <button type="button"
+        [class.activo]="seccion() === 'reservas'"
+        (click)="cambiarSeccion('reservas')">
+        ◷ <span>Mis reservas</span>
+      </button>
+
+      <button type="button"
+        [class.activo]="seccion() === 'compras'"
+        (click)="cambiarSeccion('compras')">
+        ▤ <span>Mis compras</span>
+      </button>
+
+      <div class="separador"></div>
+
+      <button type="button"
+        [class.activo]="seccion() === 'perfil'"
+        (click)="cambiarSeccion('perfil')">
+        ♙ <span>Mi perfil</span>
+      </button>
+
+      <button type="button"
+        [class.activo]="seccion() === 'configuracion'"
+        (click)="cambiarSeccion('configuracion')">
+        ⚙ <span>Configuración</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-pie">
+      <div class="usuario-resumen">
+        <span class="avatar">
+          {{ (perfil()?.nombre || usuario()?.nombre || 'U').charAt(0).toUpperCase() }}
+        </span>
+        <div>
+          <strong>{{ perfil()?.nombre || usuario()?.nombre || 'Usuario' }}</strong>
+          <small>Cuenta de cliente</small>
+        </div>
+      </div>
+
+      <button type="button"
+        class="enlace-secundario"
+        (click)="cambiarSeccion('inicio')">
+        Descubrir eventos ↗
+      </button>
+
+      <button type="button"
+        class="boton-salir"
+        (click)="cerrarSesion()">
+        Cerrar sesión
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO -->
+  <div class="cliente-contenido">
+    <div class="cliente-contenedor">
+
+      <header class="barra-superior">
+        <button type="button"
+          class="boton-menu"
+          [attr.aria-expanded]="menuMovilAbierto()"
+          (click)="menuMovilAbierto.set(!menuMovilAbierto())">
+          ☰ Menú
+        </button>
+
+        <span>
+          EVENTIX /
+          {{ seccion() === 'inicio' ? 'DESCUBRE' : 'MI CUENTA' }}
+        </span>
+
+        <button type="button"
+          class="boton-actualizar"
+          (click)="cargarDatos()"
+          [disabled]="cargando()">
+          ↻ Actualizar
+        </button>
+      </header>
+
+      @if (error()) {
+        <div class="mensaje error" role="alert">
+          {{ error() }}
+        </div>
+      }
+
+      @if (aviso()) {
+        <div class="mensaje exito" role="status">
+          {{ aviso() }}
+        </div>
+      }
+
+      @if (cargando()) {
+        <div class="mensaje cargando" role="status">
+          Actualizando tus datos...
+        </div>
+      }
+
+      @switch (seccion()) {
+
+        <!-- INICIO -->
+        @case ('inicio') {
+
+          <section class="descubre">
+            <div class="descubre-intro">
+              <span class="sobrelinea">EVENTIX / DESCUBRE</span>
+              <h1>Tu próxima experiencia empieza aquí<span>.</span></h1>
+              <p>
+                Encuentra eventos publicados y reserva tus entradas
+                sin salir de tu cuenta.
+              </p>
+            </div>
+
+            <form class="descubre-busqueda"
+              (submit)="$event.preventDefault(); buscar(campoBusqueda.value)">
+              <span aria-hidden="true">⌕</span>
+              <input #campoBusqueda
+                type="search"
+                [value]="busqueda()"
+                placeholder="Buscar eventos por nombre..."
+                aria-label="Buscar eventos">
+              <button type="submit" class="boton-primario">
+                Buscar
+              </button>
+            </form>
+
+            <div class="descubre-titulo">
+              <div>
+                <span class="sobrelinea">EXPLORA</span>
+                <h2>Eventos disponibles</h2>
+              </div>
+              <span>Solo eventos publicados</span>
+            </div>
+
+            @if (catalogoError() && !seleccionado()) {
+              <div class="mensaje error" role="alert">
+                {{ catalogoError() }}
+              </div>
+            }
+
+            @if (catalogoCargando()) {
+              <div class="vacio">
+                <p>Cargando eventos...</p>
+              </div>
+            } @else if (eventos().length === 0) {
+              <div class="vacio">
+                <span>✦</span>
+                <h3>No encontramos eventos</h3>
+                <p>Prueba con otra búsqueda o consulta más tarde.</p>
+              </div>
+            } @else {
+
+              <div class="descubre-grid">
+                @for (evento of eventos(); track evento.id) {
+                  <article class="descubre-card">
+
+                    <div class="descubre-imagen">
+                      @if (evento.imagenUrl && !imagenFallida().includes(evento.id)) {
+                        <img
+                          [src]="evento.imagenUrl"
+                          [alt]="evento.titulo"
+                          loading="lazy"
+                          (error)="falloImagen(evento.id)">
+                      } @else {
+                        <div class="descubre-placeholder">
+                          <span>✦</span>
+                          <small>EVENTIX</small>
+                        </div>
+                      }
+                      <span class="descubre-etiqueta">Disponible</span>
+                    </div>
+
+                    <div class="descubre-detalle">
+                      <div class="descubre-fecha">
+                        {{ evento.fechaInicio | date:'dd MMM yyyy' }}
+                        ·
+                        {{ evento.fechaInicio | date:'HH:mm' }}
+                      </div>
+
+                      <h3>{{ evento.titulo }}</h3>
+                      <p>
+                        {{ evento.descripcion || 'Una nueva experiencia te espera.' }}
+                      </p>
+
+                      <button type="button"
+                        class="boton-primario ancho"
+                        (click)="abrirEvento(evento)">
+                        Ver entradas →
+                      </button>
+                    </div>
+                  </article>
+                }
+              </div>
+
+              <div class="descubre-paginacion">
+                <button type="button"
+                  [disabled]="pagina() === 0"
+                  (click)="cambiarPagina(-1)">
+                  ← Anterior
+                </button>
+
+                <span>
+                  Página {{ pagina() + 1 }} de {{ paginas() }}
+                </span>
+
+                <button type="button"
+                  [disabled]="pagina() + 1 >= paginas()"
+                  (click)="cambiarPagina(1)">
+                  Siguiente →
+                </button>
+              </div>
+            }
+          </section>
+        }
+
+        <!-- MIS ENTRADAS -->
+        @case ('entradas') {
+
+          <div class="cabecera-pagina">
+            <div>
+              <span class="sobrelinea">TUS ACCESOS</span>
+              <h1>Mis entradas</h1>
+              <p>
+                Tus entradas digitales están listas para presentarse
+                en el control de acceso.
+              </p>
+            </div>
+
+            <button type="button"
+              class="boton-primario"
+              (click)="cambiarSeccion('inicio')">
+              Buscar eventos
+            </button>
+          </div>
+
+          <div class="resumen-entradas">
+            <div class="resumen-mini">
+              <span>Disponibles</span>
+              <strong>{{ entradasDisponibles() }}</strong>
+            </div>
+            <div class="resumen-mini">
+              <span>Utilizadas</span>
+              <strong>{{ entradasUtilizadas() }}</strong>
+            </div>
+            <div class="resumen-mini">
+              <span>Total</span>
+              <strong>{{ entradas().length }}</strong>
+            </div>
+          </div>
+
+          @if (!cargando() && entradas().length === 0) {
+            <div class="vacio">
+              <span>▣</span>
+              <h3>Aún no tienes entradas</h3>
+              <p>
+                Cuando confirmes una compra simulada,
+                aparecerán aquí.
+              </p>
+              <button type="button"
+                class="boton-primario"
+                (click)="cambiarSeccion('inicio')">
+                Explorar eventos
+              </button>
+            </div>
+          } @else {
+
+            <div class="tarjetas-grid">
+              @for (entrada of entradas(); track entrada.id) {
+
+                <article class="tarjeta entrada">
+
+                  <div class="tarjeta-top">
+                    <span class="etiqueta">
+                      ENTRADA #{{ entrada.id }}
+                    </span>
+
+                    <span class="estado"
+                      [class.ok]="entrada.estado === 'DISPONIBLE'"
+                      [class.pendiente]="entrada.estado === 'UTILIZADA'">
+                      {{ entrada.estado }}
+                    </span>
+                  </div>
+
+                  @if (urlPortada(entrada.imagenUrl); as portada) {
+                    <img
+                      class="entrada-portada"
+                      [src]="portada"
+                      [alt]="entrada.eventoNombre"
+                      loading="lazy">
+                  } @else {
+                    <div class="entrada-portada-vacia">
+                      ✦ EVENTIX
+                    </div>
+                  }
+
+                  <h3>{{ entrada.eventoNombre || 'Evento #' + entrada.eventoId }}</h3>
+
+                  <p>
+                    {{ entrada.tipoEntrada || 'Entrada digital' }}
+                  </p>
+
+                  @if (entrada.fechaEvento) {
+                    <div class="fila-dato">
+                      <span>Fecha del evento</span>
+                      <strong>
+                        {{ entrada.fechaEvento | date:'dd/MM/yyyy HH:mm' }}
+                      </strong>
+                    </div>
+                  }
+
+                  @if (entrada.fechaValidacion) {
+                    <p class="dato-pequeno">
+                      Ingreso registrado:
+                      {{ entrada.fechaValidacion | date:'dd/MM/yyyy HH:mm' }}
+                    </p>
+                  }
+
+                  <button type="button"
+                    class="boton-primario ancho"
+                    (click)="mostrarQr(entrada)">
+                    Ver código QR
+                  </button>
+                </article>
+              }
+            </div>
+          }
+
+          @if (qrImagen()) {
+            <div class="qr-overlay"
+              role="presentation"
+              (click)="limpiarQr()">
+
+              <div class="qr-dialogo"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Código QR de entrada"
+                (click)="$event.stopPropagation()">
+
+                <button type="button"
+                  class="cerrar-qr"
+                  (click)="limpiarQr()"
+                  aria-label="Cerrar">
+                  ✕
+                </button>
+
+                <span class="sobrelinea">TU ENTRADA DIGITAL</span>
+
+                <h2>Entrada #{{ qrSeleccionado() }}</h2>
+
+                <p>
+                  Presenta este código al personal del evento.
+                </p>
+
+                <img
+                  [src]="qrImagen()"
+                  alt="Código QR de tu entrada"
+                  width="260"
+                  height="260">
+
+                <button type="button"
+                  class="boton-contorno ancho"
+                  (click)="limpiarQr()">
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          }
+        }
+
+        <!-- MIS RESERVAS -->
+        @case ('reservas') {
+
+          <div class="cabecera-pagina">
+            <div>
+              <span class="sobrelinea">TUS COMPRAS</span>
+              <h1>Mis reservas</h1>
+              <p>
+                Confirma o cancela tus reservas antes de que expiren.
+                Los pagos son simulados.
+              </p>
+            </div>
+
+            <button type="button"
+              class="boton-primario"
+              (click)="cambiarSeccion('inicio')">
+              Reservar entradas
+            </button>
+          </div>
+
+          @if (!cargando() && reservas().length === 0) {
+            <div class="vacio">
+              <span>◷</span>
+              <h3>No tienes reservas</h3>
+              <p>
+                Elige un evento y selecciona la cantidad de entradas.
+              </p>
+              <button type="button"
+                class="boton-primario"
+                (click)="cambiarSeccion('inicio')">
+                Explorar eventos
+              </button>
+            </div>
+          } @else {
+
+            <div class="tarjetas-grid">
+
+              @for (r of reservas().slice().reverse(); track r.id) {
+
+                <article class="tarjeta reserva-tarjeta">
+
+                  <div class="tarjeta-top">
+                    <span class="etiqueta">
+                      RESERVA #{{ r.id }}
+                    </span>
+
+                    <span class="estado"
+                      [class.ok]="r.estado === 'CONFIRMADA'"
+                      [class.pendiente]="r.estado === 'PENDIENTE'">
+                      {{ r.estado }}
+                    </span>
+                  </div>
+
+                  @if (urlPortada(r.imagenUrl); as portada) {
+                    <img
+                      class="reserva-portada"
+                      [src]="portada"
+                      [alt]="r.eventoNombre"
+                      loading="lazy">
+                  } @else {
+                    <div class="reserva-portada-vacia">
+                      <span>✦</span>
+                      <small>EVENTIX</small>
+                    </div>
+                  }
+
+                  <h3>{{ r.eventoNombre }}</h3>
+
+                  <p class="reserva-subtitulo">
+                    {{ r.cantidad }}
+                    {{ r.cantidad === 1 ? 'entrada' : 'entradas' }}
+                    · {{ r.tipoEntradaNombre }}
+                  </p>
+
+                  <div class="fila-dato">
+                    <span>Fecha del evento</span>
+                    <strong>
+                      {{ r.fechaEvento | date:'dd/MM/yyyy HH:mm' }}
+                    </strong>
+                  </div>
+
+                  <div class="fila-dato">
+                    <span>Tipo de entrada</span>
+                    <strong>{{ r.tipoEntradaNombre }}</strong>
+                  </div>
+
+                  <div class="fila-dato">
+                    <span>Cantidad</span>
+                    <strong>{{ r.cantidad }}</strong>
+                  </div>
+
+                  <div class="fila-dato">
+                    <span>Precio unitario</span>
+                    <strong>
+                      ${{ r.precioUnitario | number:'1.2-2' }}
+                    </strong>
+                  </div>
+
+                  <div class="fila-dato total-reserva">
+                    <span>Total</span>
+                    <strong>
+                      ${{ r.total | number:'1.2-2' }}
+                    </strong>
+                  </div>
+
+                  <div class="fila-dato">
+                    <span>Vencimiento</span>
+                    <strong>
+                      {{ r.fechaExpiracion | date:'dd/MM/yyyy HH:mm' }}
+                    </strong>
+                  </div>
+
+                  @if (r.estado === 'PENDIENTE') {
+
+                    <div class="acciones">
+                      <button type="button"
+                        class="boton-primario ancho"
+                        [disabled]="procesandoReserva() !== null"
+                        (click)="confirmarCompra(r)">
+                        {{
+                          procesandoReserva() === r.id
+                            ? 'Procesando...'
+                            : 'Confirmar compra simulada'
+                        }}
+                      </button>
+
+                      <button type="button"
+                        class="boton-peligro ancho"
+                        [disabled]="procesandoReserva() !== null"
+                        (click)="cancelarReserva(r)">
+                        Cancelar reserva
+                      </button>
+                    </div>
+
+                  } @else if (r.estado === 'CONFIRMADA') {
+
+                    <div class="reserva-confirmada">
+                      <span>✓</span>
+                      <p>
+                        Compra simulada confirmada.
+                        Tus entradas digitales están disponibles.
+                      </p>
+                    </div>
+
+                    <button type="button"
+                      class="boton-primario ancho"
+                      (click)="cambiarSeccion('entradas')">
+                      Ver mis entradas →
+                    </button>
+
+                  } @else if (r.estado === 'EXPIRADA') {
+
+                    <p class="dato-pequeno">
+                      Esta reserva expiró y sus cupos fueron liberados.
+                    </p>
+
+                  } @else if (r.estado === 'CANCELADA') {
+
+                    <p class="dato-pequeno">
+                      Esta reserva fue cancelada.
+                    </p>
+                  }
+
+                </article>
+              }
+            </div>
+          }
+        }
+
+        <!-- MIS COMPRAS -->
+        @case ('compras') {
+
+          <div class="cabecera-pagina">
+            <div>
+              <span class="sobrelinea">TU HISTORIAL</span>
+              <h1>Mis compras</h1>
+              <p>
+                Consulta tus compras simuladas y descarga
+                sus comprobantes PDF.
+              </p>
+            </div>
+          </div>
+
+          @if (!cargando() && compras().length === 0) {
+
+            <div class="vacio">
+              <span>▤</span>
+              <h3>Aún no tienes compras</h3>
+              <p>Busca un evento, reserva y confirma tu compra.</p>
+              <button type="button"
+                class="boton-primario"
+                (click)="cambiarSeccion('inicio')">
+                Descubrir eventos
+              </button>
+            </div>
+
+          } @else {
+
+            <div class="tarjetas-grid">
+
+              @for (compra of compras(); track compra.id) {
+
+                <article class="tarjeta">
+
+                  <div class="tarjeta-top">
+                    <span class="etiqueta">
+                      EVX-{{ compra.id }}
+                    </span>
+                    <span class="estado ok">
+                      {{ compra.estado }}
+                    </span>
+                  </div>
+
+                  <h3>{{ compra.evento }}</h3>
+
+                  <p>
+                    {{ compra.tipoEntrada }}
+                    · {{ compra.cantidad }} entrada(s)
+                  </p>
+
+                  <div class="fila-dato">
+                    <span>Fecha</span>
+                    <strong>
+                      {{ compra.fechaCompra | date:'dd/MM/yyyy HH:mm' }}
+                    </strong>
+                  </div>
+
+                  <div class="fila-dato">
+                    <span>Precio unitario</span>
+                    <strong>
+                      ${{ compra.precioUnitario | number:'1.2-2' }}
+                    </strong>
+                  </div>
+
+                  <div class="fila-dato">
+                    <span>Total</span>
+                    <strong>
+                      ${{ compra.total | number:'1.2-2' }}
+                    </strong>
+                  </div>
+
+                  <button type="button"
+                    class="boton-primario ancho"
+                    [disabled]="descargando() !== null"
+                    (click)="descargarComprobante(compra)">
+                    {{
+                      descargando() === compra.id
+                        ? 'Descargando...'
+                        : 'Descargar comprobante PDF ↓'
+                    }}
+                  </button>
+
+                </article>
+              }
+            </div>
+          }
+        }
+
+        <!-- PERFIL -->
+        @case ('perfil') {
+
+          <div class="cabecera-pagina">
+            <div>
+              <span class="sobrelinea">TU CUENTA</span>
+              <h1>Mi perfil</h1>
+              <p>Información registrada en Eventix.</p>
+            </div>
+          </div>
+
+          @if (perfil(); as datos) {
+
+            <div class="perfil-card">
+
+              <div class="perfil-encabezado">
+                <span class="avatar grande">
+                  {{ datos.nombre.charAt(0).toUpperCase() }}
+                </span>
+
+                <div>
+                  <h2>{{ datos.nombre }} {{ datos.apellidos }}</h2>
+                  <p>{{ datos.rol }}</p>
+                </div>
+              </div>
+
+              <div class="fila-dato">
+                <span>Nombres</span>
+                <strong>{{ datos.nombre }}</strong>
+              </div>
+
+              <div class="fila-dato">
+                <span>Apellidos</span>
+                <strong>{{ datos.apellidos }}</strong>
+              </div>
+
+              <div class="fila-dato">
+                <span>Correo</span>
+                <strong>{{ datos.correo }}</strong>
+              </div>
+
+              <div class="fila-dato">
+                <span>Cédula</span>
+                <strong>{{ datos.cedula }}</strong>
+              </div>
+
+              <div class="fila-dato">
+                <span>Teléfono</span>
+                <strong>{{ datos.telefono }}</strong>
+              </div>
+
+              <div class="fila-dato">
+                <span>Cuenta activa</span>
+                <strong>{{ datos.activo ? 'Sí' : 'No' }}</strong>
+              </div>
+
+              <div class="fila-dato">
+                <span>Correo verificado</span>
+                <strong>{{ datos.correoVerificado ? 'Sí' : 'No' }}</strong>
+              </div>
+            </div>
+
+          } @else {
+
+            <div class="vacio">
+              <p>No se pudo mostrar el perfil.</p>
+              <button type="button"
+                class="boton-primario"
+                (click)="cargarDatos()">
+                Reintentar
+              </button>
+            </div>
+          }
+        }
+
+        <!-- CONFIGURACIÓN -->
+        @case ('configuracion') {
+
+          <div class="cabecera-pagina">
+            <div>
+              <span class="sobrelinea">PREFERENCIAS</span>
+              <h1>Configuración</h1>
+              <p>Personaliza la apariencia de Eventix.</p>
+            </div>
+          </div>
+
+          <div class="perfil-card">
+            <h2>Apariencia</h2>
+
+            <div class="opciones">
+              <button type="button"
+                [class.seleccionado]="accesibilidad.tema() === 'claro'"
+                (click)="seleccionarTema('claro')">
+                ☀ Claro
+              </button>
+
+              <button type="button"
+                [class.seleccionado]="accesibilidad.tema() === 'oscuro'"
+                (click)="seleccionarTema('oscuro')">
+                ☾ Oscuro
+              </button>
+
+              <button type="button"
+                [class.seleccionado]="accesibilidad.tema() === 'sistema'"
+                (click)="seleccionarTema('sistema')">
+                ◐ Sistema
+              </button>
+            </div>
+          </div>
+        }
+      }
+
+    </div>
+  </div>
+</section>
+
+<!-- MODAL DE RESERVA -->
+@if (seleccionado(); as evento) {
+
+  <div class="qr-overlay" (click)="cerrarEvento()">
+
+    <section class="compra-dialogo"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Reservar entradas"
+      (click)="$event.stopPropagation()">
+
+      <button type="button"
+        class="cerrar-qr"
+        (click)="cerrarEvento()"
+        aria-label="Cerrar">
+        ✕
+      </button>
+
+      <span class="sobrelinea">RESERVA TU LUGAR</span>
+
+      <h2>{{ evento.titulo }}</h2>
+
+      <p>
+        {{ evento.fechaInicio | date:'fullDate' }}
+        ·
+        {{ evento.fechaInicio | date:'shortTime' }}
+      </p>
+
+      @if (tiposDelEvento().length === 0) {
+
+        <div class="mensaje error">
+          No se encontraron tipos de entrada para este evento.
+        </div>
+
+      } @else {
+
+        <label class="compra-campo">
+          Tipo de entrada
+
+          <select #tipoSelect
+            (change)="elegirTipo(+tipoSelect.value)">
+
+            <option value="">Selecciona una entrada</option>
+
+            @for (tipo of tiposDelEvento(); track tipo.id) {
+              <option
+                [value]="tipo.id"
+                [disabled]="tipo.cantidadDisponible < 1">
+
+                {{ tipo.nombre }}
+                · ${{ tipo.precio | number:'1.2-2' }}
+                · {{ tipo.cantidadDisponible }} disponibles
+
+              </option>
+            }
+          </select>
+        </label>
+
+        <label class="compra-campo">
+          Cantidad
+
+          <input #cantidadInput
+            type="number"
+            min="1"
+            [max]="tipoElegido()?.cantidadDisponible || 10"
+            [value]="cantidad()"
+            (input)="cambiarCantidad(cantidadInput.value)">
+        </label>
+
+        <div class="compra-total">
+          <span>Total estimado</span>
+          <strong>
+            ${{ total() | number:'1.2-2' }}
+          </strong>
+        </div>
+
+        <p class="compra-nota">
+          Reserva temporal. La confirmación del pago es simulada
+          y se realiza en Mis reservas.
+        </p>
+
+        @if (catalogoError()) {
+          <div class="mensaje error">
+            {{ catalogoError() }}
+          </div>
+        }
+
+        <button type="button"
+          class="boton-primario ancho"
+          [disabled]="!tipoElegido() || reservando() || cantidad() > (tipoElegido()?.cantidadDisponible || 0)"
+          (click)="reservarEvento()">
+
+          {{
+            reservando()
+              ? 'Reservando...'
+              : 'Reservar entradas →'
+          }}
+        </button>
+      }
+    </section>
+  </div>
+}

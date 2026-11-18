@@ -1,0 +1,72 @@
+
+<div class="accesibilidad">
+
+  @if (abierto()) {
+    <div class="panel">
+
+      <div class="panel-cabecera">
+        <strong>Personaliza Eventix</strong>
+
+        <button
+          type="button"
+          aria-label="Cerrar panel"
+          (click)="alternarPanel()">
+          ✕
+        </button>
+      </div>
+
+      <div class="opcion">
+        <span>Tema de la aplicación</span>
+
+        <button
+          type="button"
+          (click)="temaService.cambiarTema()">
+
+          {{ temaService.tema() === 'light'
+             ? '☀️ Claro'
+             : '🌙 Oscuro' }}
+        </button>
+      </div>
+
+      <div class="opcion">
+        <span>Tamaño de letra</span>
+
+        <div class="controles-letra">
+          <button
+            type="button"
+            (click)="temaService.disminuirLetra()">
+            A−
+          </button>
+
+          <strong>
+            {{ temaService.tamanoLetra() }}px
+          </strong>
+
+          <button
+            type="button"
+            (click)="temaService.aumentarLetra()">
+            A+
+          </button>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="restablecer"
+        (click)="temaService.restablecerLetra()">
+        Restablecer tamaño
+      </button>
+
+    </div>
+  }
+
+  <button
+    type="button"
+    class="boton-flotante"
+    aria-label="Opciones de accesibilidad"
+    [attr.aria-expanded]="abierto()"
+    (click)="alternarPanel()">
+    ⚙
+  </button>
+
+</div>

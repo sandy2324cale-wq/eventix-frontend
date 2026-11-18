@@ -1,0 +1,139 @@
+
+<main class="catalogo">
+
+  <div class="intro">
+    <div>
+      <span class="eyebrow">EVENTIX / DESCUBRE</span>
+      <h1>Encuentra tu próxima experiencia<span>.</span></h1>
+      <p>Descubre eventos publicados, elige tus entradas y reserva tu lugar.</p>
+    </div>
+    <a routerLink="/cliente" class="panel-link">Mi cuenta ↗</a>
+  </div>
+
+  <form class="buscador" (submit)="$event.preventDefault(); buscar(campo.value)">
+    <span>⌕</span>
+    <input #campo type="search" [value]="busqueda()"
+           placeholder="Buscar conciertos, festivales, eventos..."
+           aria-label="Buscar eventos">
+    <button type="submit">Buscar eventos</button>
+  </form>
+
+  @if (error() && !seleccionado()) {
+    <div class="alerta" role="alert">{{ error() }}</div>
+  }
+
+  <div class="barra">
+    <h2>Eventos disponibles</h2>
+    <span>Solo eventos publicados</span>
+  </div>
+
+  @if (cargando()) {
+    <div class="estado">Cargando eventos...</div>
+  } @else if (!eventos().length) {
+    <div class="estado">
+      <h3>No encontramos eventos</h3>
+      <p>Prueba con otro nombre o consulta más tarde.</p>
+    </div>
+  } @else {
+    <div class="grid">
+      @for (evento of eventos(); track evento.id) {
+        <article class="evento">
+
+          <div class="imagen">
+            @if (evento.imagenUrl) {
+              <img [src]="evento.imagenUrl" [alt]="evento.titulo" loading="lazy">
+            } @else {
+              <div class="sin-imagen">✦<small>EVENTIX</small></div>
+            }
+            <span class="etiqueta">Disponible</span>
+          </div>
+
+          <div class="detalle">
+            <div class="fecha">
+              {{ evento.fechaInicio | date:'dd MMM yyyy' }}
+              · {{ evento.fechaInicio | date:'HH:mm' }}
+            </div>
+            <h3>{{ evento.titulo }}</h3>
+            <p>{{ evento.descripcion || 'Descubre esta experiencia y reserva tus entradas.' }}</p>
+            <button type="button" (click)="abrir(evento)">
+              Ver entradas <span>→</span>
+            </button>
+          </div>
+
+        </article>
+      }
+    </div>
+
+    <div class="paginacion">
+      <button type="button" [disabled]="pagina() === 0" (click)="cambiarPagina(-1)">
+        ← Anterior
+      </button>
+      <span>Página {{ pagina() + 1 }} de {{ paginas() }}</span>
+      <button type="button" [disabled]="pagina() + 1 >= paginas()" (click)="cambiarPagina(1)">
+        Siguiente →
+      </button>
+    </div>
+  }
+</main>
+
+@if (seleccionado(); as evento) {
+  <div class="fondo-modal" (click)="cerrar()">
+    <section class="modal" role="dialog" aria-modal="true"
+             aria-label="Reservar entradas" (click)="$event.stopPropagation()">
+
+      <button type="button" class="cerrar" (click)="cerrar()" aria-label="Cerrar">×</button>
+
+      <span class="eyebrow">RESERVA TU LUGAR</span>
+      <h2>{{ evento.titulo }}</h2>
+      <p class="subtitulo">
+        {{ evento.fechaInicio | date:'fullDate' }}
+        · {{ evento.fechaInicio | date:'shortTime' }}
+      </p>
+
+      @if (tiposDelEvento().length === 0) {
+        <div class="alerta">Este evento todavía no tiene entradas disponibles.</div>
+      } @else {
+        <label class="campo">
+          Tipo de entrada
+          <select #tipoSelect (change)="elegirTipo(+tipoSelect.value)">
+            <option value="">Selecciona una entrada</option>
+            @for (tipo of tiposDelEvento(); track tipo.id) {
+              <option [value]="tipo.id" [disabled]="tipo.cantidadDisponible < 1">
+                {{ tipo.nombre }} · ${{ tipo.precio | number:'1.2-2' }}
+                · {{ tipo.cantidadDisponible }} disponibles
+              </option>
+            }
+          </select>
+        </label>
+
+        <label class="campo">
+          Cantidad
+          <input #cantidadInput type="number" min="1"
+                 [max]="tipoElegido()?.cantidadDisponible || 10"
+                 [value]="cantidad()"
+                 (input)="cambiarCantidad(cantidadInput.value)">
+        </label>
+
+        <div class="total">
+          <span>Total estimado</span>
+          <strong>${{ total() | number:'1.2-2' }}</strong>
+        </div>
+
+        <p class="nota">
+          La reserva dura 10 minutos. El pago es simulado y se confirma
+          desde Mi cuenta → Mis reservas.
+        </p>
+
+        @if (error()) {
+          <div class="alerta" role="alert">{{ error() }}</div>
+        }
+
+        <button type="button" class="reservar"
+                [disabled]="!tipoElegido() || procesando() || cantidad() > (tipoElegido()?.cantidadDisponible || 0)"
+                (click)="reservar()">
+          {{ procesando() ? 'Reservando...' : 'Reservar entradas →' }}
+        </button>
+      }
+    </section>
+  </div>
+}

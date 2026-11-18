@@ -1,0 +1,134 @@
+
+<section class="verificacion-pagina">
+
+  <div class="verificacion-tarjeta">
+
+    <div class="verificacion-icono">
+      @if (verificado()) {
+        ✓
+      } @else {
+        ✉
+      }
+    </div>
+
+    @if (verificado()) {
+
+      <h1>¡Correo verificado!</h1>
+
+      <p>
+        Tu cuenta de Eventix está activada.
+        Ya puedes iniciar sesión.
+      </p>
+
+      @if (aviso()) {
+        <div class="verificacion-exito" role="status">
+          {{ aviso() }}
+        </div>
+      }
+
+      <button
+        type="button"
+        class="verificacion-boton"
+        (click)="irAlLogin()"
+        appDescripcionVoz="Ir a iniciar sesión. Tu correo ya está verificado y puedes acceder a Eventix.">
+        Iniciar sesión →
+      </button>
+
+    } @else {
+
+      <span class="verificacion-etiqueta">
+        SEGURIDAD DE TU CUENTA
+      </span>
+
+      <h1>Verifica tu correo</h1>
+
+      <p>
+        Te enviamos un código de seis dígitos.
+        Escríbelo para activar tu cuenta.
+      </p>
+
+      <form (ngSubmit)="verificar()" novalidate>
+
+        <div class="verificacion-campo">
+          <label for="correo">Correo electrónico</label>
+
+          <input
+            id="correo"
+            name="correo"
+            type="email"
+            autocomplete="email"
+            [(ngModel)]="correo"
+            placeholder="ejemplo@correo.com"
+            required
+            appDescripcionVoz="Correo electrónico que utilizaste al registrarte."
+          />
+        </div>
+
+        <div class="verificacion-campo">
+          <label for="codigo">Código de verificación</label>
+
+          <input
+            id="codigo"
+            name="codigo"
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="6"
+            [(ngModel)]="codigo"
+            placeholder="000000"
+            required
+            class="verificacion-codigo"
+            appDescripcionVoz="Código de verificación. Ingresa los seis números recibidos en tu correo."
+          />
+
+          <small>
+            Revisa también la carpeta de correo no deseado.
+          </small>
+        </div>
+
+        @if (error()) {
+          <div class="verificacion-error" role="alert">
+            ⚠ {{ error() }}
+          </div>
+        }
+
+        @if (aviso()) {
+          <div class="verificacion-exito" role="status">
+            ✓ {{ aviso() }}
+          </div>
+        }
+
+        <button
+          type="submit"
+          class="verificacion-boton"
+          [disabled]="cargando()"
+          appDescripcionVoz="Verificar cuenta. Comprueba el código recibido en tu correo electrónico.">
+          {{ cargando() ? 'Verificando...' : 'Verificar mi cuenta →' }}
+        </button>
+
+      </form>
+
+      <div class="verificacion-reenvio">
+        <span>¿No recibiste el código?</span>
+
+        <button
+          type="button"
+          [disabled]="reenviando()"
+          (click)="reenviar()"
+          appDescripcionVoz="Reenviar código. Solicita otro código de verificación a tu correo.">
+          {{ reenviando() ? 'Enviando...' : 'Reenviar código' }}
+        </button>
+      </div>
+
+      <a
+        routerLink="/login"
+        class="verificacion-volver"
+        appDescripcionVoz="Volver a iniciar sesión.">
+        ← Volver al inicio de sesión
+      </a>
+
+    }
+
+  </div>
+
+</section>

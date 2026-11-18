@@ -1,0 +1,327 @@
+<div class="organizador-layout">
+  <!-- NAVEGACIÓN MÓVIL -->
+  <button class="menu-movil" type="button" (click)="menuAbierto.set(!menuAbierto())">☰</button>
+  @if (menuAbierto()) {
+    <div class="menu-fondo" (click)="menuAbierto.set(false)"></div>
+  }
+
+  <!-- MENÚ LATERAL -->
+  <aside class="sidebar" [class.abierto]="menuAbierto()">
+    <div class="marca">
+      <div class="marca-icono">E</div>
+      <div><h2>EVENTIX</h2><span>ORGANIZACIÓN</span></div>
+    </div>
+
+    <div class="sidebar-label">MENÚ PRINCIPAL</div>
+    <nav class="menu">
+      <button type="button" [class.activo]="seccion() === 'resumen'" (click)="cambiarSeccion('resumen')">▦ Resumen general</button>
+      <button type="button" [class.activo]="seccion() === 'ubicaciones'" (click)="cambiarSeccion('ubicaciones')">⌖ Mis ubicaciones</button>
+      <button type="button" [class.activo]="seccion() === 'eventos'" (click)="cambiarSeccion('eventos')">▤ Mis eventos</button>
+      <button type="button" [class.activo]="seccion() === 'entradas'" (click)="cambiarSeccion('entradas')">◈ Tipos de entrada</button>
+      <button type="button" [class.activo]="seccion() === 'personal'" (click)="cambiarSeccion('personal')">♙ Personal de acceso</button>
+    </nav>
+
+    <div class="sidebar-pie">
+      <strong>Organizador</strong>
+      <button class="salir" type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO -->
+  <main class="contenido">
+    <header class="encabezado">
+      <div>
+        <span class="subtitulo">EVENTIX / ORGANIZADOR</span>
+        <h1>{{ nombreSeccion() }}</h1>
+        <p>Administra tus espacios, eventos y entradas.</p>
+      </div>
+      <button class="boton-secundario" type="button" (click)="cargarTodo()" [disabled]="cargando() || organizadorId() === null">↻ Actualizar</button>
+    </header>
+
+    <!-- ORGANIZACIÓN VINCULADA A LA CUENTA -->
+    <section class="panel identidad">
+      <div class="organizacion-info">
+        <span class="subtitulo">MI ORGANIZACIÓN</span>
+        <h2>{{ nombreOrganizacion() || 'Cargando organización...' }}</h2>
+        <p>Organización vinculada automáticamente a tu cuenta de Eventix.</p>
+      </div>
+    </section>
+
+    @if (error()) {
+      <div class="alerta error" role="alert">
+        {{ error() }}
+        <button type="button" (click)="error.set('')">×</button>
+      </div>
+    }
+    @if (mensaje()) {
+      <div class="alerta exito" role="status">
+        {{ mensaje() }}
+        <button type="button" (click)="mensaje.set('')">×</button>
+      </div>
+    }
+
+    <!-- RESUMEN -->
+    @if (seccion() === 'resumen') {
+      <section class="estadisticas">
+        <article class="estadistica"><span>▤</span><p>Mis eventos</p><h2>{{ misEventos().length }}</h2></article>
+        <article class="estadistica"><span>⌖</span><p>Mis ubicaciones</p><h2>{{ misUbicaciones().length }}</h2></article>
+        <article class="estadistica"><span>◈</span><p>Tipos de entrada</p><h2>{{ misTipos().length }}</h2></article>
+        <article class="estadistica"><span>✓</span><p>Entradas disponibles</p><h2>{{ totalDisponibles() }}</h2></article>
+      </section>
+      <section class="panel">
+        <h2>Comienza a organizar</h2>
+        <p>Primero registra una ubicación, después crea un evento, configura sus entradas y finalmente publícalo.</p>
+        <div class="acciones">
+          <button class="boton-principal" type="button" (click)="cambiarSeccion('ubicaciones'); abrirUbicacion()">+ Nueva ubicación</button>
+          <button class="boton-secundario" type="button" (click)="cambiarSeccion('eventos'); abrirEvento()">+ Nuevo evento</button>
+        </div>
+      </section>
+    }
+
+    <!-- UBICACIONES -->
+    @if (seccion() === 'ubicaciones') {
+      <section class="panel">
+        <div class="panel-cabecera">
+          <div><h2>Mis ubicaciones</h2><p>Espacios asociados a tu organización.</p></div>
+          <button class="boton-principal" type="button" (click)="abrirUbicacion()">+ Nueva ubicación</button>
+        </div>
+
+        @if (mostrarUbicacion()) {
+          <form class="formulario" (ngSubmit)="guardarUbicacion()">
+            <h3>{{ editandoUbicacion() !== null ? 'Editar ubicación' : 'Registrar ubicación' }}</h3>
+            <div class="form-grid">
+              <label>Nombre<input name="nombre" [(ngModel)]="ubicacionForm.nombre" required /></label>
+              <label>Ciudad<input name="ciudad" [(ngModel)]="ubicacionForm.ciudad" required /></label>
+              <label>Dirección<input name="direccion" [(ngModel)]="ubicacionForm.direccion" required /></label>
+              <label>Capacidad<input name="capacidad" type="number" min="1" [(ngModel)]="ubicacionForm.capacidad" required /></label>
+            </div>
+            <div class="acciones">
+              <button class="boton-secundario" type="button" (click)="mostrarUbicacion.set(false)">Cancelar</button>
+              <button class="boton-principal" type="submit" [disabled]="procesando()">Guardar ubicación</button>
+            </div>
+          </form>
+        }
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead><tr><th>Nombre</th><th>Ciudad</th><th>Dirección</th><th>Capacidad</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody>
+              @for (u of misUbicaciones(); track u.id) {
+                <tr>
+                  <td><strong>{{ u.nombre }}</strong></td>
+                  <td>{{ u.ciudad }}</td><td>{{ u.direccion }}</td><td>{{ u.capacidad }}</td>
+                  <td><span class="estado" [class.aprobado]="u.activa">{{ u.activa ? 'Activa' : 'Inactiva' }}</span></td>
+                  <td><div class="acciones">
+                    <button class="boton-secundario" type="button" (click)="abrirUbicacion(u)" [disabled]="procesando()">Editar</button>
+                    <button class="boton-rechazar" type="button" (click)="desactivarUbicacion(u)" [disabled]="!u.activa || procesando()">Desactivar</button>
+                  </div></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="6" class="vacio">No hay ubicaciones propias en los registros cargados.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+
+    <!-- EVENTOS -->
+    @if (seccion() === 'eventos') {
+      <section class="panel">
+        <div class="panel-cabecera">
+          <div><h2>Mis eventos</h2><p>Selecciona un evento para consultar su aforo y entradas.</p></div>
+          <button class="boton-principal" type="button" (click)="abrirEvento()">+ Nuevo evento</button>
+        </div>
+
+        @if (mostrarEvento()) {
+          <form class="formulario" (ngSubmit)="guardarEvento()">
+            <h3>{{ editandoEvento() !== null ? 'Editar borrador' : 'Crear evento' }}</h3>
+            <div class="form-grid">
+              <label>Título<input name="titulo" [(ngModel)]="eventoForm.titulo" minlength="5" maxlength="180" required /></label>
+              <label>Ubicación
+                <select name="ubicacionId" [(ngModel)]="eventoForm.ubicacionId" required>
+                  <option [ngValue]="0">Selecciona ubicación</option>
+                  @for (u of misUbicaciones(); track u.id) {
+                    @if (u.activa) { <option [ngValue]="u.id">{{ u.nombre }} — {{ u.ciudad }} (cap. {{ u.capacidad }})</option> }
+                  }
+                </select>
+              </label>
+              <label class="ancho">Descripción<textarea name="descripcion" rows="3" [(ngModel)]="eventoForm.descripcion" minlength="10" maxlength="2000" required></textarea></label>
+              <label>Inicio<input name="fechaInicio" type="datetime-local" [(ngModel)]="eventoForm.fechaInicio" required /></label>
+              <label>Fin<input name="fechaFin" type="datetime-local" [(ngModel)]="eventoForm.fechaFin" required /></label>
+              <label>Aforo máximo<input name="aforoMaximo" type="number" min="1" [(ngModel)]="eventoForm.aforoMaximo" required /></label>
+            </div>
+            <div class="acciones">
+              <button class="boton-secundario" type="button" (click)="mostrarEvento.set(false)">Cancelar</button>
+              <button class="boton-principal" type="submit" [disabled]="procesando()">Guardar evento</button>
+            </div>
+          </form>
+        }
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead><tr><th>Evento</th><th>Inicio</th><th>Ubicación</th><th>Aforo</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody>
+              @for (e of misEventos(); track e.id) {
+                <tr>
+                  <td><img *ngIf="e.imagenUrl" class="portada-mini" [src]="imagenEvento(e.imagenUrl)" [alt]="e.titulo" /><strong>{{ e.titulo }}</strong><small>#{{ e.id }}</small></td>
+                  <td>{{ e.fechaInicio | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ ubicacionNombre(e.ubicacionId) }}</td>
+                  <td>{{ e.aforoMaximo }}</td>
+                  <td><span class="estado" [class.aprobado]="e.estado === 'PUBLICADO'">{{ e.estado }}</span></td>
+                  <td><div class="acciones">
+                    <button class="boton-principal" type="button" (click)="verEvento(e)">Ver detalles</button>
+                    @if (e.estado === 'BORRADOR') {
+                      <button class="boton-secundario" type="button" (click)="abrirEvento(e)">Editar</button>
+                      <button class="boton-aprobar" type="button" (click)="cambiarEstado(e, 'PUBLICADO')" [disabled]="procesando()">Publicar</button>
+                    }
+                    @if (e.estado === 'BORRADOR' || e.estado === 'PUBLICADO') {
+                      <button class="boton-secundario" type="button" (click)="abrirTipo(e)">Entradas</button>
+                    }
+                    @if (e.estado === 'PUBLICADO') {
+                      <button class="boton-secundario" type="button" (click)="cambiarEstado(e, 'CERRADO')" [disabled]="procesando()">Cerrar</button>
+                    }
+                    @if (e.estado === 'BORRADOR' || e.estado === 'PUBLICADO' || e.estado === 'CERRADO') {
+                      <button class="boton-rechazar" type="button" (click)="cambiarEstado(e, 'CANCELADO')" [disabled]="procesando()">Cancelar</button>
+                    }
+                  </div></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="6" class="vacio">No hay eventos propios en los registros cargados.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      @if (eventoSeleccionado(); as e) {
+        <section class="panel detalle-evento">
+          <div class="panel-cabecera">
+            <div><span class="subtitulo">DETALLE DEL EVENTO</span><h2>{{ e.titulo }}</h2></div>
+            <button class="boton-secundario" type="button" (click)="cerrarDetalle()">Cerrar detalles ×</button>
+          </div>
+          <p>{{ e.descripcion }}</p>
+          <div class="portada-panel">
+            @if (e.imagenUrl) { <img class="portada-grande" [src]="imagenEvento(e.imagenUrl)" [alt]="'Portada de ' + e.titulo" /> }
+            @if (e.estado === 'BORRADOR') {
+              <label>Portada JPG, PNG o WebP (máximo 5 MB)
+                <input type="file" accept="image/jpeg,image/png,image/webp" (change)="seleccionarImagen($event)" />
+              </label>
+              <button type="button" class="boton-principal" (click)="subirPortada(e)" [disabled]="!imagenArchivo || procesando()">Subir portada</button>
+            }
+          </div>
+          <div class="detalle-grid">
+            <div><small>Ubicación</small><strong>{{ ubicacionNombre(e.ubicacionId) }}</strong></div>
+            <div><small>Inicio</small><strong>{{ e.fechaInicio | date:'dd/MM/yyyy HH:mm' }}</strong></div>
+            <div><small>Fin</small><strong>{{ e.fechaFin | date:'dd/MM/yyyy HH:mm' }}</strong></div>
+            <div><small>Estado</small><strong>{{ e.estado }}</strong></div>
+            <div><small>Aforo máximo</small><strong>{{ e.aforoMaximo }} personas</strong></div>
+            <div><small>Entradas configuradas</small><strong>{{ entradasConfiguradas(e.id) }}</strong></div>
+            <div><small>Entradas disponibles</small><strong>{{ entradasDisponibles(e.id) }}</strong></div>
+            <div><small>Capacidad sin asignar</small><strong>{{ e.aforoMaximo - entradasConfiguradas(e.id) }}</strong></div>
+          </div>
+          <div class="barra-aforo" role="progressbar" [attr.aria-valuenow]="porcentajeAforo(e)" aria-valuemin="0" aria-valuemax="100" aria-label="Porcentaje del aforo configurado">
+            <div [style.width.%]="porcentajeAforo(e)"></div>
+          </div>
+          <p class="nota-aforo">{{ porcentajeAforo(e) }}% del aforo asignado a tipos de entrada. No equivale a entradas vendidas.</p>
+          <h3>Tipos de entrada del evento</h3>
+          <div class="tabla-contenedor">
+            <table>
+              <thead><tr><th>Tipo</th><th>Precio</th><th>Total</th><th>Disponibles</th></tr></thead>
+              <tbody>
+                @for (t of tiposDelEvento(e.id); track t.id) {
+                  <tr><td>{{ t.nombre }}</td><td>{{ t.precio | currency:'USD' }}</td><td>{{ t.cantidadTotal }}</td><td>{{ t.cantidadDisponible }}</td></tr>
+                } @empty {
+                  <tr><td colspan="4" class="vacio">Todavía no hay tipos de entrada.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (e.estado === 'BORRADOR' || e.estado === 'PUBLICADO') {
+            <div class="acciones">
+              <button class="boton-principal" type="button" (click)="abrirTipo(e)">+ Configurar entradas</button>
+              @if (e.estado === 'BORRADOR') {
+                <button class="boton-secundario" type="button" (click)="abrirEvento(e)">Editar aforo y datos</button>
+              }
+              @if (e.estado === 'BORRADOR') {
+                <button class="boton-aprobar" type="button" (click)="cambiarEstado(e, 'PUBLICADO')" [disabled]="procesando()">Publicar</button>
+              }
+            </div>
+          }
+        </section>
+      }
+    }
+
+    <!-- TIPOS DE ENTRADA -->
+    @if (seccion() === 'entradas') {
+      <section class="panel">
+        <div class="panel-cabecera">
+          <div><h2>Tipos de entrada</h2><p>Configura entradas General, VIP y otras categorías para tus eventos en borrador.</p></div>
+          <button class="boton-principal" type="button" (click)="abrirTipo()">+ Nuevo tipo</button>
+        </div>
+
+        @if (mostrarTipo()) {
+          <form class="formulario" (ngSubmit)="guardarTipo()">
+            <div class="form-grid">
+              <label>Evento
+                <select name="eventoId" [(ngModel)]="tipoForm.eventoId" required>
+                  <option [ngValue]="0">Selecciona evento</option>
+                  @for (e of misEventos(); track e.id) {
+                    @if (e.estado === 'BORRADOR') {
+                       <option [ngValue]="e.id">{{ e.titulo }} — {{ e.estado }}</option>
+                     }
+                  }
+                </select>
+              </label>
+              <label>Nombre<input name="tipoNombre" [(ngModel)]="tipoForm.nombre" minlength="2" required /></label>
+              <label>Precio ($)<input name="precio" type="number" min="0" step="0.01" [(ngModel)]="tipoForm.precio" required /></label>
+              <label>Cantidad<input name="cantidad" type="number" min="1" [(ngModel)]="tipoForm.cantidadTotal" required /></label>
+            </div>
+            <div class="acciones">
+              <button class="boton-secundario" type="button" (click)="mostrarTipo.set(false)">Cancelar</button>
+              <button class="boton-principal" type="submit" [disabled]="procesando()">Crear tipo</button>
+            </div>
+          </form>
+        }
+
+        <div class="tabla-contenedor">
+          <table>
+            <thead><tr><th>Evento</th><th>Tipo</th><th>Precio</th><th>Cantidad</th><th>Disponibles</th></tr></thead>
+            <tbody>
+              @for (t of misTipos(); track t.id) {
+                <tr><td>{{ nombreEvento(t.eventoId) }}</td><td><strong>{{ t.nombre }}</strong></td><td>{{ t.precio | currency:'USD' }}</td><td>{{ t.cantidadTotal }}</td><td>{{ t.cantidadDisponible }}</td></tr>
+              } @empty {
+                <tr><td colspan="5" class="vacio">No hay tipos de entrada en los registros cargados.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+    @if (seccion() === 'personal') {
+      <section class="panel">
+        <h2>Invitar personal de acceso</h2>
+        <p>El empleado recibirá por correo un token para activar su cuenta y establecer una contraseña.</p>
+        <form class="formulario" (ngSubmit)="registrarPersonal()">
+          <div class="form-grid">
+            <label>Nombre<input name="pNombre" [(ngModel)]="personalForm.nombre" required minlength="2" /></label>
+            <label>Apellidos<input name="pApellidos" [(ngModel)]="personalForm.apellidos" required minlength="2" /></label>
+            <label>Correo<input name="pCorreo" type="email" [(ngModel)]="personalForm.correo" required /></label>
+            <label>Cédula<input name="pCedula" [(ngModel)]="personalForm.cedula" maxlength="10" required /></label>
+            <label>Celular<input name="pTelefono" [(ngModel)]="personalForm.telefono" maxlength="10" required /></label>
+          </div>
+          <div class="acciones"><button type="submit" class="boton-principal" [disabled]="procesando()">Enviar invitación</button></div>
+        </form>
+      </section>
+      <section class="panel">
+        <h2>Asignar empleado a un evento</h2>
+        <div class="form-grid">
+          <label>Empleado<select name="asigPersonal" [(ngModel)]="asignacionPersonalId"><option [ngValue]="0">Seleccionar</option>@for(p of personal();track p.id){<option [ngValue]="p.id">{{p.nombre}} — {{p.correo}}</option>}</select></label>
+          <label>Evento<select name="asigEvento" [(ngModel)]="asignacionEventoId"><option [ngValue]="0">Seleccionar</option>@for(e of misEventos();track e.id){@if(e.estado === 'PUBLICADO' || e.estado === 'BORRADOR'){<option [ngValue]="e.id">{{e.titulo}}</option>}}</select></label>
+        </div>
+        <button class="boton-principal" type="button" (click)="asignarEmpleado()" [disabled]="procesando() || !asignacionPersonalId || !asignacionEventoId">Asignar al evento</button>
+        <div class="tabla-contenedor"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Estado</th></tr></thead><tbody>@for(p of personal();track p.id){<tr><td>{{p.nombre}}</td><td>{{p.correo}}</td><td>{{p.activo ? 'Activo' : 'Invitación pendiente'}}</td></tr>}@empty{<tr><td colspan="3">Sin personal registrado</td></tr>}</tbody></table></div>
+      </section>
+    }
+  </main>
+</div>

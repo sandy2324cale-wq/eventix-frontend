@@ -1,0 +1,254 @@
+
+<section class="auth-pagina">
+
+  <div class="auth-contenedor">
+
+    <!-- ====================================== -->
+    <!-- PRESENTACIÓN -->
+    <!-- ====================================== -->
+
+    <div class="auth-presentacion">
+
+      <span class="auth-etiqueta">
+        ✦ BIENVENIDO DE NUEVO
+      </span>
+
+      <h1>
+        Tu próxima experiencia
+        <span>comienza aquí.</span>
+      </h1>
+
+      <p>
+        Accede a Eventix para descubrir eventos,
+        administrar tus entradas y disfrutar de
+        nuevas experiencias.
+      </p>
+
+      <div class="auth-beneficios">
+
+        <div>
+          ✦ Descubre eventos únicos
+        </div>
+
+        <div>
+          ◈ Gestiona tus entradas digitales
+        </div>
+
+        <div>
+          ✓ Accede a tus experiencias fácilmente
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ====================================== -->
+    <!-- TARJETA DE LOGIN -->
+    <!-- ====================================== -->
+
+    <div class="auth-tarjeta">
+
+      <div class="auth-tarjeta-cabecera">
+
+        <div class="auth-icono">
+          ✦
+        </div>
+
+        <h2>Iniciar sesión</h2>
+
+        <p>
+          Ingresa tus datos para continuar.
+        </p>
+
+      </div>
+
+      <!-- ==================================== -->
+      <!-- FORMULARIO -->
+      <!-- ==================================== -->
+
+      <form
+        #formLogin="ngForm"
+        (ngSubmit)="iniciarSesion()">
+
+        <!-- CORREO -->
+
+        <div class="auth-campo">
+
+          <label for="login-correo">
+            Correo electrónico
+          </label>
+
+          <input
+            id="login-correo"
+            name="correo"
+            type="email"
+            autocomplete="email"
+            placeholder="ejemplo@correo.com"
+            [(ngModel)]="correo"
+            required
+            email
+            appDescripcionVoz="Correo electrónico. Ingresa el correo con el que te registraste en Eventix."
+          />
+
+        </div>
+
+        <!-- CONTRASEÑA -->
+
+        <div class="auth-campo">
+
+          <label for="login-contrasena">
+            Contraseña
+          </label>
+
+          <div class="auth-input-contrasena">
+
+            <input
+              id="login-contrasena"
+              name="contrasena"
+              [type]="mostrarContrasena() ? 'text' : 'password'"
+              autocomplete="current-password"
+              placeholder="Ingresa tu contraseña"
+              [(ngModel)]="contrasena"
+              required
+              appDescripcionVoz="Contraseña. Ingresa tu contraseña de acceso."
+            />
+
+            <button
+              type="button"
+              class="auth-ver"
+              [attr.aria-label]="mostrarContrasena()
+                ? 'Ocultar contraseña'
+                : 'Mostrar contraseña'"
+              [appDescripcionVoz]="mostrarContrasena()
+                ? 'Ocultar contraseña. Deja de mostrar los caracteres.'
+                : 'Mostrar contraseña. Permite ver los caracteres escritos.'"
+              (click)="alternarContrasena()">
+
+              {{
+                mostrarContrasena()
+                  ? 'Ocultar'
+                  : 'Mostrar'
+              }}
+
+            </button>
+
+          </div>
+
+        </div>
+
+        <!-- ================================== -->
+        <!-- MENSAJES -->
+        <!-- ================================== -->
+
+        @if (error()) {
+
+          <p
+            class="auth-error"
+            role="alert">
+
+            {{ error() }}
+
+          </p>
+
+        }
+
+        <!-- CORREO SIN VERIFICAR -->
+
+        @if (necesitaVerificacion()) {
+
+          <a
+            routerLink="/verificar-correo"
+            [queryParams]="{ correo: correo }"
+            class="auth-verificacion-boton"
+            appDescripcionVoz="Tu correo todavía no está verificado. Ir a la pantalla para verificarlo.">
+
+            Verificar mi correo ahora →
+
+          </a>
+
+        }
+
+        <!-- CUENTA BLOQUEADA -->
+
+        @if (cuentaBloqueada()) {
+
+          <div class="auth-bloqueo-alerta">
+
+            <strong>
+              Tu cuenta necesita una revisión
+            </strong>
+
+            <p>
+              Si consideras que el bloqueo fue
+              un error, puedes presentar una
+              apelación para que el administrador
+              revise tu caso.
+            </p>
+
+            <a
+              routerLink="/apelacion"
+              [queryParams]="{ correo: correo }"
+              class="auth-bloqueo-boton"
+              appDescripcionVoz="Presentar apelación. Solicita la revisión del bloqueo de tu cuenta.">
+
+              Presentar apelación →
+
+            </a>
+
+          </div>
+
+        }
+
+        <!-- ================================== -->
+        <!-- BOTÓN LOGIN -->
+        <!-- ================================== -->
+
+        <button
+          class="auth-enviar"
+          type="submit"
+          [disabled]="cargando()"
+          appDescripcionVoz="Iniciar sesión. Comprueba los datos para acceder a tu cuenta de Eventix.">
+
+          {{
+            cargando()
+              ? 'Ingresando...'
+              : 'Iniciar sesión ↗'
+          }}
+
+        </button>
+
+      </form>
+
+      <nav class="auth-enlaces-compactos" aria-label="Ayuda con tu cuenta">
+        <a routerLink="/verificar-correo" [queryParams]="correo ? { correo: correo } : {}">Verificar mi correo</a>
+        <span aria-hidden="true">·</span>
+        <a routerLink="/apelacion" [queryParams]="correo ? { correo: correo } : {}">Apelar bloqueo</a>
+        <a routerLink="/activar-personal">Activar cuenta de personal</a>
+      </nav>
+
+      <!-- ==================================== -->
+      <!-- REGISTRO -->
+      <!-- ==================================== -->
+
+      <div class="auth-separador">
+
+        <span>
+          ¿Todavía no tienes cuenta?
+        </span>
+
+      </div>
+
+      <a
+        routerLink="/registro"
+        class="auth-enlace-registro"
+        appDescripcionVoz="Crear cuenta. Abre el formulario para registrarte en Eventix.">
+
+        Crear una cuenta gratuita
+
+      </a>
+
+    </div>
+
+  </div>
+
+</section>

@@ -1,0 +1,37 @@
+
+<!-- Barra superior para páginas públicas -->
+@if (!esDashboard()) {
+  <app-navbar></app-navbar>
+}
+
+<!-- Contenido principal -->
+<main id="contenido-principal">
+  <router-outlet></router-outlet>
+</main>
+
+<!-- Footer solamente para páginas públicas -->
+@if (!esDashboard()) {
+  <app-footer></app-footer>
+}
+
+<!-- Panel de accesibilidad -->
+<app-accesibilidad></app-accesibilidad>
+
+<!-- Asistente de voz -->
+<button
+  type="button"
+  class="boton-voz"
+  [class.hablando]="accesibilidad.leyendo()"
+  [class.activo]="accesibilidad.vozActiva()"
+  [attr.aria-pressed]="accesibilidad.vozActiva()"
+  [attr.aria-label]="accesibilidad.vozActiva()
+    ? 'Desactivar asistencia por voz'
+    : 'Activar asistencia por voz'"
+  [attr.title]="accesibilidad.vozActiva()
+    ? 'Desactivar asistente de voz'
+    : 'Activar asistente de voz'"
+  (click)="accesibilidad.alternarLectura()">
+
+  {{ accesibilidad.vozActiva() ? '🔊' : '🔈' }}
+
+</button>

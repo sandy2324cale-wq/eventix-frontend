@@ -1,0 +1,28 @@
+<main class="apelacion-pagina">
+  <section class="apelacion-tarjeta">
+    <a routerLink="/login" class="volver">← Volver al login</a>
+    <div class="logo">E</div>
+    <h1>Apelar bloqueo</h1>
+    <p class="intro">Solicita una revisión de tu cuenta Eventix. Tu apelación será evaluada por el administrador.</p>
+    @if (error()) { <div class="alerta error" role="alert">{{ error() }}</div> }
+    @if (mensaje()) { <div class="alerta exito" role="status">{{ mensaje() }}</div> }
+    @if (!enviada()) {
+      @if (paso() === 1) {
+        <form (ngSubmit)="solicitarCodigo()">
+          <label for="correo">Correo de tu cuenta</label>
+          <input id="correo" name="correo" type="email" [(ngModel)]="correo" required autocomplete="email" placeholder="correo@ejemplo.com" />
+          <button type="submit" [disabled]="cargando()">{{ cargando() ? 'Enviando...' : 'Solicitar código' }}</button>
+        </form>
+      } @else {
+        <form (ngSubmit)="enviarApelacion()">
+          <label for="codigo">Código de verificación</label>
+          <input id="codigo" name="codigo" [(ngModel)]="codigo" maxlength="6" inputmode="numeric" autocomplete="one-time-code" required placeholder="6 dígitos" />
+          <label for="motivo">Explica por qué solicitas el desbloqueo</label>
+          <textarea id="motivo" name="motivo" rows="6" maxlength="1000" [(ngModel)]="motivo" required placeholder="Explica tu situación..."></textarea>
+          <small>{{ motivo.length }}/1000 caracteres</small>
+          <button type="submit" [disabled]="cargando()">{{ cargando() ? 'Enviando...' : 'Enviar apelación' }}</button>
+        </form>
+      }
+    }
+  </section>
+</main>

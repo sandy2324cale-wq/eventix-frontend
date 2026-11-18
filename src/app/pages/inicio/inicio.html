@@ -1,0 +1,286 @@
+
+<!-- HERO -->
+<section class="hero">
+  <div class="resplandor resplandor-uno"></div>
+  <div class="resplandor resplandor-dos"></div>
+
+  <div class="contenedor hero-contenido">
+
+    <div class="hero-texto">
+
+      <span class="etiqueta">
+        ✦ TU PRÓXIMA EXPERIENCIA COMIENZA AQUÍ
+      </span>
+
+      <h1>
+        Los mejores momentos
+        <span>se viven en directo.</span>
+      </h1>
+
+      <p>
+        Conciertos, festivales, experiencias y mucho más.
+        Descubre eventos increíbles y encuentra tu próxima aventura.
+      </p>
+
+      <div class="hero-acciones">
+
+        <a
+          routerLink="/eventos"
+          class="boton-principal"
+          appDescripcionVoz="Explorar eventos. Aquí puedes descubrir conciertos, festivales, deportes y actividades culturales.">
+
+          Explorar eventos ↗
+        </a>
+
+        <a
+          routerLink="/login"
+          [queryParams]="{ returnUrl: '/organizador' }"
+          class="boton-secundario"
+          appDescripcionVoz="Publicar un evento. Debes iniciar sesión como organizador para administrar y publicar eventos.">
+
+          Publicar un evento
+        </a>
+
+      </div>
+
+      <div class="hero-estadisticas">
+        <span>✦ Experiencias únicas</span>
+        <span>✓ Entradas digitales</span>
+        <span>◈ Acceso con QR</span>
+      </div>
+
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+
+      <div class="circulo-externo">
+        <div class="circulo-interno">✦</div>
+      </div>
+
+      <div class="tarjeta-flotante arriba">
+        <span>♫</span>
+        <div>
+          <strong>Siente la música</strong>
+          <small>Vive cada momento</small>
+        </div>
+      </div>
+
+      <div class="tarjeta-flotante abajo">
+        <span>◈</span>
+        <div>
+          <strong>Tu entrada, tu experiencia</strong>
+          <small>Acceso digital con QR</small>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- BUSCADOR -->
+<section class="busqueda-seccion">
+  <div class="contenedor">
+
+    <div class="busqueda-panel">
+
+      <div class="campo-busqueda">
+        <span aria-hidden="true">⌕</span>
+
+        <input
+          type="search"
+          placeholder="Busca eventos, artistas o experiencias..."
+          aria-label="Buscar eventos"
+          appDescripcionVoz="Buscador de eventos. Escribe el nombre de un evento o artista para encontrar resultados."
+          [ngModel]="busqueda()"
+          (ngModelChange)="busqueda.set($event)"
+          (keydown.enter)="buscarEventos()"
+        />
+      </div>
+
+      <div class="filtros">
+
+        <select
+          aria-label="Filtrar por ciudad"
+          appDescripcionVoz="Filtro de ciudad. Selecciona la ciudad donde quieres encontrar eventos."
+          [ngModel]="ciudad()"
+          (ngModelChange)="ciudad.set($event)">
+
+          <option value="">Todas las ciudades</option>
+          <option value="Cuenca">Cuenca</option>
+          <option value="Quito">Quito</option>
+          <option value="Guayaquil">Guayaquil</option>
+          <option value="Loja">Loja</option>
+        </select>
+
+        <select
+          aria-label="Filtrar por categoría"
+          appDescripcionVoz="Filtro de categoría. Puedes buscar conciertos, festivales, cultura o deportes."
+          [ngModel]="categoria()"
+          (ngModelChange)="categoria.set($event)">
+
+          <option value="">Todas las categorías</option>
+          <option value="Conciertos">Conciertos</option>
+          <option value="Festivales">Festivales</option>
+          <option value="Cultura">Cultura</option>
+          <option value="Deportes">Deportes</option>
+        </select>
+
+        @if (filtrosActivos()) {
+          <button
+            type="button"
+            class="limpiar"
+            appDescripcionVoz="Limpiar filtros. Elimina la búsqueda y los filtros seleccionados."
+            (click)="limpiarFiltros()">
+
+            Limpiar
+          </button>
+        }
+
+        <button
+          type="button"
+          class="boton-principal"
+          appDescripcionVoz="Buscar eventos. Muestra los eventos que coincidan con el texto, ciudad y categoría seleccionados."
+          (click)="buscarEventos()">
+
+          Buscar eventos ↗
+        </button>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- EVENTOS DESTACADOS -->
+<section class="destacados contenedor">
+
+  <div class="seccion-cabecera">
+
+    <div>
+      <span class="subtitulo">DESCUBRE EVENTIX</span>
+
+      <h2>Experiencias que te esperan</h2>
+
+      <p>
+        Explora los eventos disponibles en nuestra plataforma.
+      </p>
+    </div>
+
+    <a
+      routerLink="/eventos"
+      class="ver-todos"
+      appDescripcionVoz="Ver todos los eventos. Abre el catálogo completo de eventos disponibles.">
+
+      Ver todos los eventos ↗
+    </a>
+
+  </div>
+
+
+  <!-- CATEGORÍAS -->
+  <div class="categorias">
+
+    <a
+      routerLink="/eventos"
+      [queryParams]="{ categoria: 'Conciertos' }"
+      class="categoria"
+      appDescripcionVoz="Conciertos. Explora eventos de música en vivo.">
+
+      <span>♫</span>
+      <strong>Conciertos</strong>
+      <small>Música en vivo</small>
+    </a>
+
+    <a
+      routerLink="/eventos"
+      [queryParams]="{ categoria: 'Festivales' }"
+      class="categoria"
+      appDescripcionVoz="Festivales. Descubre festivales y grandes experiencias.">
+
+      <span>✦</span>
+      <strong>Festivales</strong>
+      <small>Grandes experiencias</small>
+    </a>
+
+    <a
+      routerLink="/eventos"
+      [queryParams]="{ categoria: 'Cultura' }"
+      class="categoria"
+      appDescripcionVoz="Cultura. Encuentra actividades artísticas y culturales.">
+
+      <span>◈</span>
+      <strong>Cultura</strong>
+      <small>Arte y creatividad</small>
+    </a>
+
+    <a
+      routerLink="/eventos"
+      [queryParams]="{ categoria: 'Deportes' }"
+      class="categoria"
+      appDescripcionVoz="Deportes. Explora eventos y actividades deportivas.">
+
+      <span>★</span>
+      <strong>Deportes</strong>
+      <small>Vive la emoción</small>
+    </a>
+
+  </div>
+
+
+  <!-- CATÁLOGO -->
+  <div class="eventos-placeholder">
+
+    <div class="placeholder-icono">✦</div>
+
+    <h3>Descubre tu próximo evento</h3>
+
+    <p>
+      Explora conciertos, festivales y actividades
+      publicadas por organizadores aprobados.
+    </p>
+
+    <a
+      routerLink="/eventos"
+      class="boton-principal"
+      appDescripcionVoz="Ver eventos disponibles. Accede al catálogo de eventos de Eventix.">
+
+      Ver eventos disponibles ↗
+    </a>
+
+  </div>
+
+</section>
+
+
+<!-- ORGANIZADORES -->
+<section class="organiza">
+
+  <div class="contenedor organiza-contenido">
+
+    <div>
+      <span class="subtitulo">PARA ORGANIZADORES</span>
+
+      <h2>
+        Tu próximo gran evento empieza aquí.
+      </h2>
+
+      <p>
+        Publica tus eventos, gestiona tus entradas
+        y conecta con tu público desde un solo lugar.
+      </p>
+    </div>
+
+    <a
+      routerLink="/login"
+      [queryParams]="{ returnUrl: '/organizador' }"
+      class="boton-principal"
+      appDescripcionVoz="Quiero organizar eventos. Inicia sesión como organizador para crear eventos y administrar tus entradas.">
+
+      Quiero organizar eventos ↗
+    </a>
+
+  </div>
+
+</section>

@@ -1,0 +1,354 @@
+
+<div class="control-page">
+
+  <!-- =====================================
+       BARRA SUPERIOR
+       ===================================== -->
+
+  <header class="control-header">
+
+    <div class="marca">
+      <div class="marca-icono">E</div>
+
+      <div>
+        <strong>EVENTIX</strong>
+        <small>CONTROL DE ACCESO</small>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="btn-salir"
+      (click)="salir()">
+      Cerrar sesión
+    </button>
+
+  </header>
+
+  <main class="control-contenido">
+
+    <!-- =====================================
+         ENCABEZADO
+         ===================================== -->
+
+    <section class="bienvenida">
+
+      <div>
+        <span class="eyebrow">PANEL DE PERSONAL</span>
+
+        <h1>Validación de entradas</h1>
+
+        <p>
+          Escanea los códigos QR de los asistentes
+          y controla los ingresos a tus eventos.
+        </p>
+      </div>
+
+      <div class="estado-sistema">
+        <span class="punto-verde"></span>
+        Sistema de validación
+      </div>
+
+    </section>
+
+    <!-- =====================================
+         ESTADÍSTICAS
+         ===================================== -->
+
+    <section class="resumen-grid">
+
+      <article class="resumen-card">
+        <span class="resumen-icono">✓</span>
+
+        <div>
+          <small>Ingresos validados</small>
+          <strong>{{ ingresosValidados() }}</strong>
+          <span>En esta sesión</span>
+        </div>
+      </article>
+
+      <article class="resumen-card">
+        <span class="resumen-icono morado">▣</span>
+
+        <div>
+          <small>Eventos asignados</small>
+          <strong>{{ asignaciones().length }}</strong>
+          <span>Asignaciones registradas</span>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- =====================================
+         CONTENIDO PRINCIPAL
+         ===================================== -->
+
+    <div class="principal-grid">
+
+      <!-- ESCÁNER -->
+
+      <section class="panel scanner-panel">
+
+        <div class="panel-cabecera">
+          <div>
+            <span class="eyebrow">ESCÁNER QR</span>
+            <h2>Escanear entrada</h2>
+          </div>
+
+          <span class="chip">
+            {{ camaraActiva() ? 'Cámara activa' : 'Cámara apagada' }}
+          </span>
+        </div>
+
+        <p class="descripcion">
+          Apunta la cámara al código QR de la entrada
+          para verificar automáticamente su validez.
+        </p>
+
+        <div class="scanner-viewport">
+
+          @if (camaraActiva()) {
+
+            <video
+              #videoScanner
+              autoplay
+              muted
+              playsinline>
+            </video>
+
+            <div class="scanner-marco">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+
+          } @else {
+
+            <div class="scanner-vacio">
+
+              <div class="scanner-simbolo">▦</div>
+
+              <strong>Escáner listo</strong>
+
+              <p>
+                Activa la cámara para comenzar
+                a leer códigos QR.
+              </p>
+
+            </div>
+
+          }
+
+        </div>
+
+        @if (errorCamara()) {
+          <div class="mensaje error">
+            {{ errorCamara() }}
+          </div>
+        }
+
+        <div class="scanner-acciones">
+
+          @if (!camaraActiva()) {
+
+            <button
+              type="button"
+              class="btn-primario"
+              [disabled]="iniciandoCamara() || procesando()"
+              (click)="activarCamara()">
+
+              {{ iniciandoCamara()
+                ? 'Iniciando cámara...'
+                : 'Activar cámara' }}
+
+            </button>
+
+          } @else {
+
+            <button
+              type="button"
+              class="btn-secundario"
+              (click)="detenerCamara()">
+              Detener cámara
+            </button>
+
+          }
+
+        </div>
+
+        <p class="ayuda">
+          Permite el acceso a la cámara cuando
+          el navegador lo solicite.
+        </p>
+
+      </section>
+
+      <!-- VALIDACIÓN MANUAL -->
+
+      <section class="panel manual-panel">
+
+        <div class="panel-cabecera">
+
+          <div>
+            <span class="eyebrow">VALIDACIÓN MANUAL</span>
+            <h2>Introducir código</h2>
+          </div>
+
+        </div>
+
+        <p class="descripcion">
+          Si no puedes utilizar la cámara,
+          introduce el UUID de la entrada.
+        </p>
+
+        <form (ngSubmit)="validar()">
+
+          <label for="codigo">
+            Código UUID de la entrada
+          </label>
+
+          <input
+            id="codigo"
+            name="codigo"
+            type="text"
+            [(ngModel)]="codigo"
+            placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+            autocomplete="off"
+            [disabled]="procesando()"
+          />
+
+          <button
+            type="submit"
+            class="btn-primario"
+            [disabled]="procesando() || !codigo.trim()">
+
+            {{ procesando()
+              ? 'Validando entrada...'
+              : 'Validar ingreso' }}
+
+          </button>
+
+        </form>
+
+        <!-- RESULTADO DE VALIDACIÓN -->
+
+        @if (mensaje() && resultado()) {
+
+          <div
+            class="resultado"
+            [class.correcto]="resultado() === 'ok'"
+            [class.incorrecto]="resultado() === 'error'"
+            role="status">
+
+            <div class="resultado-icono">
+              {{ resultado() === 'ok' ? '✓' : '!' }}
+            </div>
+
+            <div>
+              <strong>
+                {{ resultado() === 'ok'
+                  ? 'Acceso autorizado'
+                  : 'Acceso rechazado' }}
+              </strong>
+
+              <p>{{ mensaje() }}</p>
+            </div>
+
+          </div>
+
+        }
+
+        <!-- ÚLTIMO INGRESO -->
+
+        @if (ultimoIngreso()) {
+
+          <div class="ultimo-ingreso">
+
+            <span>Último ingreso autorizado</span>
+
+            <strong>{{ ultimoIngreso() }}</strong>
+
+          </div>
+
+        }
+
+      </section>
+
+    </div>
+
+    <!-- =====================================
+         EVENTOS ASIGNADOS
+         ===================================== -->
+
+    <section class="panel eventos-panel">
+
+      <div class="panel-cabecera">
+
+        <div>
+          <span class="eyebrow">MIS ASIGNACIONES</span>
+          <h2>Eventos asignados</h2>
+        </div>
+
+        <button
+          type="button"
+          class="btn-actualizar"
+          (click)="cargarAsignaciones()">
+          Actualizar
+        </button>
+
+      </div>
+
+      @if (cargando()) {
+
+        <div class="estado-vacio">
+          Cargando eventos asignados...
+        </div>
+
+      } @else if (asignaciones().length === 0) {
+
+        <div class="estado-vacio">
+          No tienes eventos asignados actualmente.
+        </div>
+
+      } @else {
+
+        <div class="eventos-lista">
+
+          @for (asignacion of asignaciones(); track asignacion.id) {
+
+            <article class="evento-item">
+
+              <div class="evento-icono">▣</div>
+
+              <div class="evento-informacion">
+                <strong>
+                  Evento #{{ asignacion.eventoId }}
+                </strong>
+
+                <span>
+                  Asignación #{{ asignacion.id }}
+                </span>
+              </div>
+
+              <span
+                class="evento-estado"
+                [class.inactivo]="!asignacion.activo">
+
+                {{ asignacion.activo ? 'Activo' : 'Inactivo' }}
+
+              </span>
+
+            </article>
+
+          }
+
+        </div>
+
+      }
+
+    </section>
+
+  </main>
+
+</div>

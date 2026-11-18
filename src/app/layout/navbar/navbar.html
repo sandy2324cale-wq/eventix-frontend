@@ -1,0 +1,280 @@
+
+<header class="navbar">
+  <div class="contenedor barra">
+
+    <!-- LOGOTIPO -->
+    <a
+      routerLink="/"
+      class="marca"
+      (click)="cerrarMenus()"
+      aria-label="Eventix, inicio"
+      appDescripcionVoz="Eventix. Plataforma para descubrir y organizar eventos. Regresar al inicio.">
+
+      <span class="marca-icono">✦</span>
+      <span>eventix<span class="punto">.</span></span>
+    </a>
+
+    <!-- NAVEGACIÓN PRINCIPAL -->
+    <nav class="navegacion" aria-label="Navegación principal">
+
+      <a
+        routerLink="/"
+        routerLinkActive="activo"
+        [routerLinkActiveOptions]="{ exact: true }"
+        appDescripcionVoz="Ir al inicio de Eventix.">
+        Inicio
+      </a>
+
+      <a
+        routerLink="/eventos"
+        routerLinkActive="activo"
+        appDescripcionVoz="Explorar eventos disponibles.">
+        Explorar eventos
+      </a>
+
+      @if (auth.estaAutenticado()) {
+
+        <a
+          [routerLink]="rutaPanel()"
+          routerLinkActive="activo"
+          appDescripcionVoz="Abrir mi panel de Eventix.">
+          Mi panel
+        </a>
+
+      } @else {
+
+        <a
+          routerLink="/login"
+          [queryParams]="{ returnUrl: '/organizador' }"
+          appDescripcionVoz="Organiza tu evento. Inicia sesión como organizador para administrar tus eventos.">
+          Organiza tu evento
+        </a>
+
+      }
+
+    </nav>
+
+    <!-- ACCIONES -->
+    <div class="acciones">
+
+      @if (auth.estaAutenticado()) {
+
+        <button
+          type="button"
+          class="icono-boton boton-volver"
+          aria-label="Volver al panel"
+          title="Volver al panel"
+          appDescripcionVoz="Volver a mi panel de Eventix."
+          (click)="volver()">
+          ←
+        </button>
+
+      }
+
+      <!-- ACCESIBILIDAD -->
+      <button
+        class="icono-boton"
+        type="button"
+        aria-label="Configuración de accesibilidad"
+        [attr.aria-expanded]="configuracionAbierta()"
+        appDescripcionVoz="Configuración de accesibilidad. Cambiar tema y tamaño del texto."
+        (click)="configuracionAbierta.set(!configuracionAbierta())">
+        ⚙
+      </button>
+
+      @if (auth.estaAutenticado()) {
+
+        <div class="usuario-navbar">
+          <span class="usuario-avatar" aria-hidden="true">
+            {{ (usuario()?.nombre || 'U').charAt(0).toUpperCase() }}
+          </span>
+
+          <div class="usuario-datos">
+            <strong>{{ usuario()?.nombre }}</strong>
+            <small>{{ usuario()?.rol }}</small>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="boton-salir"
+          appDescripcionVoz="Cerrar sesión de Eventix."
+          (click)="cerrarSesion()">
+          Salir
+        </button>
+
+      } @else {
+
+        <a
+          routerLink="/login"
+          class="entrar"
+          appDescripcionVoz="Ingresar a mi cuenta de Eventix.">
+          Ingresar
+        </a>
+
+        <a
+          routerLink="/registro"
+          class="boton-principal"
+          appDescripcionVoz="Registrarse en Eventix.">
+          Registrarse
+        </a>
+
+      }
+
+      <!-- MENÚ MÓVIL -->
+      <button
+        type="button"
+        class="icono-boton boton-menu"
+        [attr.aria-expanded]="menuAbierto()"
+        aria-controls="menu-movil-eventix"
+        aria-label="Abrir o cerrar menú"
+        appDescripcionVoz="Menú de navegación de Eventix."
+        (click)="menuAbierto.set(!menuAbierto())">
+        {{ menuAbierto() ? '✕' : '☰' }}
+      </button>
+
+    </div>
+
+    <!-- MENÚ MÓVIL -->
+    @if (menuAbierto()) {
+
+      <nav
+        id="menu-movil-eventix"
+        class="menu-movil"
+        aria-label="Navegación móvil">
+
+        <a routerLink="/" (click)="cerrarMenus()">
+          Inicio
+        </a>
+
+        <a routerLink="/eventos" (click)="cerrarMenus()">
+          Explorar eventos
+        </a>
+
+        @if (auth.estaAutenticado()) {
+
+          <a [routerLink]="rutaPanel()" (click)="cerrarMenus()">
+            Mi panel
+          </a>
+
+          <button type="button" (click)="volver()">
+            Volver
+          </button>
+
+          <button type="button" (click)="cerrarSesion()">
+            Cerrar sesión
+          </button>
+
+        } @else {
+
+          <a routerLink="/login" (click)="cerrarMenus()">
+            Ingresar
+          </a>
+
+          <a routerLink="/registro" (click)="cerrarMenus()">
+            Registrarse
+          </a>
+
+          <a
+            routerLink="/login"
+            [queryParams]="{ returnUrl: '/organizador' }"
+            (click)="cerrarMenus()">
+            Organiza tu evento
+          </a>
+
+        }
+
+      </nav>
+    }
+
+    <!-- PANEL DE ACCESIBILIDAD -->
+    @if (configuracionAbierta()) {
+
+      <section
+        class="panel-accesibilidad"
+        aria-label="Configuración de accesibilidad">
+
+        <div class="panel-cabecera">
+          <strong>Personaliza Eventix</strong>
+
+          <button
+            type="button"
+            aria-label="Cerrar configuración"
+            appDescripcionVoz="Cerrar configuración de accesibilidad."
+            (click)="configuracionAbierta.set(false)">
+            ✕
+          </button>
+        </div>
+
+        <p>Apariencia</p>
+
+        <div class="opciones">
+
+          <button
+            type="button"
+            [class.seleccionado]="accesibilidad.tema() === 'oscuro'"
+            [attr.aria-pressed]="accesibilidad.tema() === 'oscuro'"
+            appDescripcionVoz="Activar tema oscuro."
+            (click)="seleccionarTema('oscuro')">
+            ☾ Oscuro
+          </button>
+
+          <button
+            type="button"
+            [class.seleccionado]="accesibilidad.tema() === 'claro'"
+            [attr.aria-pressed]="accesibilidad.tema() === 'claro'"
+            appDescripcionVoz="Activar tema claro."
+            (click)="seleccionarTema('claro')">
+            ☀ Claro
+          </button>
+
+          <button
+            type="button"
+            [class.seleccionado]="accesibilidad.tema() === 'sistema'"
+            [attr.aria-pressed]="accesibilidad.tema() === 'sistema'"
+            appDescripcionVoz="Utilizar el tema del sistema."
+            (click)="seleccionarTema('sistema')">
+            ◐ Auto
+          </button>
+
+        </div>
+
+        <p>Tamaño del texto</p>
+
+        <div class="tamano">
+
+          <button
+            type="button"
+            aria-label="Disminuir texto"
+            appDescripcionVoz="Disminuir tamaño de letra."
+            (click)="accesibilidad.disminuirLetra()">
+            A−
+          </button>
+
+          <strong aria-label="Tamaño actual del texto">
+            {{ accesibilidad.tamanoLetra() }}%
+          </strong>
+
+          <button
+            type="button"
+            aria-label="Aumentar texto"
+            appDescripcionVoz="Aumentar tamaño de letra."
+            (click)="accesibilidad.aumentarLetra()">
+            A+
+          </button>
+
+        </div>
+
+        <button
+          class="restaurar"
+          type="button"
+          appDescripcionVoz="Restablecer tamaño de letra al cien por ciento."
+          (click)="accesibilidad.restaurarLetra()">
+          Restablecer tamaño
+        </button>
+
+      </section>
+    }
+
+  </div>
+</header>

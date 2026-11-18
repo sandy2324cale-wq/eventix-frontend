@@ -1,0 +1,102 @@
+
+main {
+  min-height: calc(100vh - 160px);
+}
+
+.boton-voz {
+  position: fixed;
+  bottom: 26px;
+  right: 26px;
+  z-index: 200;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 1px solid #c4b5fd80;
+  background: linear-gradient(135deg, #9333ea, #6d28d9);
+  box-shadow: 0 8px 32px #7c3aed80;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+
+  &:hover {
+    transform: scale(1.08);
+    box-shadow: 0 10px 45px #8b5cf6aa;
+  }
+
+  &:focus-visible {
+    outline: 3px solid white;
+    outline-offset: 4px;
+  }
+
+  &.hablando {
+    animation: pulso 1.5s infinite;
+  }
+}
+
+@keyframes pulso {
+  50% {
+    box-shadow: 0 0 0 13px #8b5cf630;
+  }
+}
+
+/* =========================================
+   EVENTIX - BOTÓN DE LECTURA POR VOZ
+   ========================================= */
+
+.boton-voz {
+  position: fixed;
+
+  // Encima del botón de configuración
+  right: 24px;
+  bottom: 94px;
+
+  width: 56px;
+  height: 56px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: var(--morado);
+  color: #ffffff;
+
+  font-size: 1.5rem;
+  cursor: pointer;
+
+  box-shadow: 0 8px 28px rgba(118, 56, 232, 0.35);
+
+  z-index: 1001;
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.boton-voz:hover {
+  transform: scale(1.08);
+  background: var(--morado-hover);
+}
+
+/* Cuando está leyendo */
+.boton-voz.hablando {
+  background: #e54875;
+  animation: pulso-voz 1.5s infinite;
+}
+
+@keyframes pulso-voz {
+  0% {
+    box-shadow: 0 0 0 0 rgba(229, 72, 117, 0.45);
+  }
+
+  70% {
+    box-shadow: 0 0 0 15px rgba(229, 72, 117, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(229, 72, 117, 0);
+  }
+}

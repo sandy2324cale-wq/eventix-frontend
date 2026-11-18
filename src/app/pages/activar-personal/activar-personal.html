@@ -1,0 +1,154 @@
+
+<main class="activation-page">
+
+  <section class="activation-card">
+
+    <div class="brand">
+      ✦ EVENTIX
+    </div>
+
+    <div class="icon-box">
+      ✉
+    </div>
+
+    <h1>Activa tu cuenta</h1>
+
+    <p class="subtitle">
+      Has sido invitado como personal de control de acceso.
+      Introduce el código enviado a tu correo y crea tu contraseña.
+    </p>
+
+    @if (exito()) {
+
+      <div class="message success" role="status">
+        {{ mensaje() }}
+      </div>
+
+      <a routerLink="/login" class="primary-link">
+        Iniciar sesión
+      </a>
+
+    } @else {
+
+      <form (ngSubmit)="activar()" #form="ngForm">
+
+        <label for="correo">
+          Correo electrónico
+        </label>
+
+        <input
+          id="correo"
+          type="email"
+          name="correo"
+          [(ngModel)]="correo"
+          placeholder="empleado@correo.com"
+          autocomplete="email"
+          required
+          email
+        />
+
+        <label for="codigo">
+          Código de activación
+        </label>
+
+        <input
+          id="codigo"
+          type="text"
+          name="codigo"
+          [(ngModel)]="codigo"
+          placeholder="000000"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          maxlength="6"
+          minlength="6"
+          pattern="[0-9]{6}"
+          required
+          class="code-input"
+        />
+
+        <p class="help">
+          El código tiene seis dígitos y caduca en 5 minutos.
+        </p>
+
+        <div class="resend-container">
+          <span>¿No recibiste el código?</span>
+
+          <button
+            type="button"
+            class="resend-button"
+            (click)="reenviarCodigo()"
+            [disabled]="reenviando() || !correo.trim()"
+          >
+            {{
+              reenviando()
+                ? 'Enviando...'
+                : 'Reenviar código'
+            }}
+          </button>
+        </div>
+
+        @if (mensajeReenvio()) {
+          <p class="resend-message" role="status">
+            {{ mensajeReenvio() }}
+          </p>
+        }
+
+        <label for="password">
+          Nueva contraseña
+        </label>
+
+        <input
+          id="password"
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          placeholder="Mínimo 12 caracteres"
+          autocomplete="new-password"
+          minlength="12"
+          maxlength="72"
+          required
+        />
+
+        <label for="confirmar">
+          Confirmar contraseña
+        </label>
+
+        <input
+          id="confirmar"
+          type="password"
+          name="confirmar"
+          [(ngModel)]="confirmarPassword"
+          placeholder="Repite tu contraseña"
+          autocomplete="new-password"
+          required
+        />
+
+        @if (mensaje()) {
+          <div class="message error" role="alert">
+            {{ mensaje() }}
+          </div>
+        }
+
+        <button
+          type="submit"
+          class="activate-button"
+          [disabled]="ocupado() || form.invalid"
+        >
+          {{
+            ocupado()
+              ? 'Activando cuenta...'
+              : 'Activar mi cuenta'
+          }}
+        </button>
+
+      </form>
+    }
+
+    <div class="footer">
+      ¿Ya tienes una cuenta?
+      <a routerLink="/login">Inicia sesión</a>
+    </div>
+
+  </section>
+
+</main>
