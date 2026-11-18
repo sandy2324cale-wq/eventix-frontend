@@ -73,6 +73,52 @@ export class ControlAcceso implements OnInit, OnDestroy {
 
   // Contador local de ingresos validados
   ingresosValidados = signal(0);
+  // Ventana de resultado del escaneo
+modalVisible = signal(false);
+modalResultado = signal<'ok' | 'error'>('ok');
+modalMensaje = signal('');
+modalCodigo = signal('');
+modalHora = signal('');
+
+// Indica si el código llegó desde la cámara
+private validacionDesdeCamara = false;
+
+mostrarModal(
+  tipo: 'ok' | 'error',
+  mensaje: string,
+  codigo: string
+): void {
+  this.modalResultado.set(tipo);
+  this.modalMensaje.set(mensaje);
+  this.modalCodigo.set(codigo);
+  this.modalHora.set(
+    new Date().toLocaleString('es-EC', {
+      timeZone: 'America/Guayaquil'
+    })
+  );
+  this.modalVisible.set(true);
+}
+
+cerrarModal(): void {
+  this.modalVisible.set(false);
+  this.validacionDesdeCamara = false;
+}
+
+async continuarEscaneando(): Promise<void> {
+  const reactivar = this.validacionDesdeCamara;
+
+  this.cerrarModal();
+  this.codigo = '';
+
+  // Permite volver a leer el mismo QR para
+  // comprobar que ya fue utilizado.
+  this.ultimoCodigo = '';
+  this.ultimaLectura = 0;
+
+  if (reactivar) {
+    await this.activarCamara();
+  }
+}
 
   ngOnInit(): void {
     this.cargarAsignaciones();
@@ -161,10 +207,10 @@ export class ControlAcceso implements OnInit, OnDestroy {
 
           const codigo = resultado.getText().trim();
 
-          // Evitar múltiples validaciones simultáneas
-          if (this.procesando()) {
-            return;
-          }
+              // Evitar múltiples validaciones simultáneas
+            if (this.procesando() || this.modalVisible()) {
+              return;
+            }
 
           const ahora = Date.now();
 
@@ -179,6 +225,7 @@ export class ControlAcceso implements OnInit, OnDestroy {
           this.ultimaLectura = ahora;
 
           this.codigo = codigo;
+          this.validacionDesdeCamara = true;
 
           // Detener lectura antes de validar
           this.detenerCamara();
@@ -215,68 +262,78 @@ export class ControlAcceso implements OnInit, OnDestroy {
   // VALIDAR ENTRADA
   // ==========================================
 
-  validar(): void {
+  
+validar(): void {
 
-    if (this.procesando()) {
-      return;
-    }
+  if (this.procesando() || this.modalVisible()) {
+    return;
+  }
 
-    const codigo = this.codigo.trim();
+  const codigo = this.codigo.trim();
 
-    // Validación del formato UUID
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-    if (!uuidRegex.test(codigo)) {
+  if (!uuidRegex.test(codigo)) {
 
-      this.resultado.set('error');
-      this.mensaje.set(
-        'El código QR no contiene un UUID válido.'
+    const mensaje =
+      'El código QR no contiene un UUID válido.';
+
+    this.resultado.set('error');
+    this.mensaje.set(mensaje);
+
+    this.mostrarModal('error', mensaje, codigo);
+    return;
+  }
+
+  this.procesando.set(true);
+  this.resultado.set('');
+  this.mensaje.set('');
+
+  this.http.post(
+    `${this.apiUrl}/acceso/validar/${encodeURIComponent(codigo)}`,
+    {}
+  ).subscribe({
+
+    next: () => {
+
+      const mensaje =
+        'La entrada fue validada correctamente y el ingreso quedó registrado.';
+
+      this.resultado.set('ok');
+      this.mensaje.set(mensaje);
+
+      this.ultimoIngreso.set(
+        new Date().toLocaleString('es-EC', {
+          timeZone: 'America/Guayaquil'
+        })
       );
 
-      return;
+      this.ingresosValidados.update(valor => valor + 1);
+
+      this.procesando.set(false);
+
+      // Mostrar éxito solo si el backend aceptó el QR.
+      this.mostrarModal('ok', mensaje, codigo);
+    },
+
+    error: (error) => {
+
+      const mensaje =
+        typeof error.error?.message === 'string'
+          ? error.error.message
+          : 'Acceso rechazado. Verifica que la entrada sea válida.';
+
+      this.resultado.set('error');
+      this.mensaje.set(mensaje);
+
+      this.procesando.set(false);
+
+      this.mostrarModal('error', mensaje, codigo);
     }
+  });
+}
 
-    this.procesando.set(true);
-    this.resultado.set('');
-    this.mensaje.set('');
-
-    this.http.post(
-      `${this.apiUrl}/acceso/validar/${encodeURIComponent(codigo)}`,
-      {}
-    ).subscribe({
-
-      next: () => {
-
-        this.resultado.set('ok');
-
-        this.mensaje.set(
-          'Acceso autorizado. La entrada fue marcada como utilizada.'
-        );
-
-        this.ultimoIngreso.set(
-          new Date().toLocaleString('es-EC')
-        );
-
-        this.ingresosValidados.update(valor => valor + 1);
-
-        this.codigo = '';
-        this.procesando.set(false);
-      },
-
-      error: (error) => {
-
-        this.resultado.set('error');
-
-        this.mensaje.set(
-          error.error?.message ||
-          'Acceso rechazado. Verifica que la entrada sea válida.'
-        );
-
-        this.procesando.set(false);
-      }
-    });
-  }
 
   // ==========================================
   // CERRAR SESIÓN

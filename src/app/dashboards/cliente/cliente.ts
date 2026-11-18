@@ -265,6 +265,18 @@ export class Cliente implements OnInit, OnDestroy {
   // NORMALIZAR PORTADAS
   // ==========================================
 
+  portadaError(event: Event): void {
+    const imagen = event.target as HTMLImageElement | null;
+    if (!imagen) return;
+    imagen.style.display = 'none';
+    const contenedor = imagen.parentElement;
+    if (!contenedor || contenedor.querySelector('.eventix-portada-fallback')) return;
+    const fallback = document.createElement('div');
+    fallback.className = 'eventix-portada-fallback';
+    fallback.textContent = 'âœ¦ EVENTIX';
+    fallback.style.cssText = 'display:flex;align-items:center;justify-content:center;min-height:150px;width:100%;border-radius:12px;background:linear-gradient(135deg,#24113d,#6d28d9);color:#fff;font-weight:800;letter-spacing:2px;';
+    imagen.insertAdjacentElement('afterend', fallback);
+  }
   urlPortada(
     imagenUrl: string | null | undefined
   ): string | null {
@@ -386,7 +398,7 @@ export class Cliente implements OnInit, OnDestroy {
   }
 
   // ==========================================
-  // CONFIRMAR COMPRA SIMULADA
+  // CONFIRMAR RESERVA
   // ==========================================
 
   confirmarCompra(reserva: ReservaVista): void {
@@ -400,7 +412,7 @@ export class Cliente implements OnInit, OnDestroy {
 
     if (
       !confirm(
-        'Esta es una compra SIMULADA, sin cobro bancario. ¿Confirmar y emitir las entradas?'
+        'Â¿Deseas confirmar esta reserva y emitir tus entradas digitales? No se realizarÃ¡ ningÃºn cobro bancario.'
       )
     ) {
       return;
@@ -421,7 +433,7 @@ export class Cliente implements OnInit, OnDestroy {
         this.cargarDatos();
 
         this.aviso.set(
-          `Compra simulada #${compra.id} confirmada. Total: $${Number(compra.total).toFixed(2)}. Ya puedes consultar tus entradas.`
+          `Reserva #${compra.id} confirmada. Total: $${Number(compra.total).toFixed(2)}. Ya puedes consultar tus entradas.`
         );
       },
 

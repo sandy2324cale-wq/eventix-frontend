@@ -764,6 +764,7 @@ button:disabled {
 
 }
 
+
 @media (max-width: 370px) {
 
   .resumen-grid {
@@ -780,3 +781,167 @@ button:disabled {
   }
 
 }
+
+/* ==========================================
+   MODAL DE VALIDACIÓN QR - EVENTIX
+   ========================================== */
+
+.qr-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(12, 8, 28, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.qr-modal {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  padding: 38px 30px 30px;
+  border-radius: 24px;
+  background: #ffffff;
+  color: #211435;
+  text-align: center;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+  animation: qrModalEntrada 0.25s ease-out;
+}
+
+.qr-modal-cerrar {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  border: none;
+  background: transparent;
+  color: #81758f;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.qr-modal-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 86px;
+  height: 86px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #16a34a;
+  font-size: 48px;
+  font-weight: 700;
+}
+
+.qr-modal-icono-error {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.qr-modal-etiqueta {
+  display: block;
+  margin-bottom: 12px;
+  color: #7c3aed;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.qr-modal h2 {
+  margin: 0 0 12px;
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.qr-modal-descripcion {
+  margin: 0 auto 24px;
+  color: #716780;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.qr-modal-detalles {
+  padding: 10px 18px;
+  border: 1px solid #eee8f7;
+  border-radius: 16px;
+  background: #f8f5ff;
+  text-align: left;
+}
+
+.qr-modal-detalles > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid #e8e0f3;
+}
+
+.qr-modal-detalles > div:last-child {
+  border-bottom: none;
+}
+
+.qr-modal-detalles span {
+  color: #776b87;
+  font-size: 12px;
+}
+
+.qr-modal-detalles strong {
+  font-size: 12px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.qr-modal-texto-error {
+  color: #dc2626;
+}
+
+.qr-modal-boton {
+  width: 100%;
+  margin-top: 24px;
+  padding: 15px 20px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.qr-modal-boton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+}
+
+.qr-modal-error .qr-modal-boton {
+  background: #dc2626;
+}
+
+@keyframes qrModalEntrada {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .qr-modal {
+    padding: 34px 20px 24px;
+  }
+
+  .qr-modal h2 {
+    font-size: 24px;
+  }
+}
+
