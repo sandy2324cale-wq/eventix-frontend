@@ -812,3 +812,19 @@ table {
 .acciones-tabla button { white-space: nowrap; }
 .modal { max-height: calc(100vh - 40px); overflow-y: auto; }
 @media (max-width: 760px) { .modal-fondo { padding: 12px; } .modal { padding: 20px; } }
+
+
+@media (min-width: 761px) {
+  .sidebar {
+    width: 220px;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+  }
+
+  .sidebar-pie {
+    margin-top: auto;
+  }
+}

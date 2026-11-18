@@ -244,3 +244,18 @@ td small { color: var(--muted); margin-top: 5px; }
 @media (max-width: 600px) { .detalle-grid { grid-template-columns: 1fr; } }
 
 .portada-mini{width:72px;height:48px;object-fit:cover;border-radius:8px;display:block;margin-bottom:5px}.portada-panel{display:flex;flex-wrap:wrap;align-items:end;gap:14px;margin:18px 0}.portada-grande{width:100%;max-width:580px;max-height:300px;object-fit:cover;border-radius:14px}.portada-panel label{display:grid;gap:8px}
+
+@media (min-width: 761px) {
+  .sidebar {
+    width: 220px;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+  }
+
+  .sidebar-pie {
+    margin-top: auto;
+  }
+}
