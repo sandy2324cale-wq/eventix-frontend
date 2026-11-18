@@ -828,3 +828,22 @@ table {
     margin-top: auto;
   }
 }
+
+/* SIDEBAR FIJO - ADMINISTRADOR */
+
+@media (min-width: 761px) {
+  .sidebar {
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+
+    height: 100dvh;
+    max-height: 100dvh;
+
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+
+    z-index: 50;
+  }
+}

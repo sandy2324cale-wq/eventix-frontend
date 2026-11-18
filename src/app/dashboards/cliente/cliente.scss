@@ -1186,3 +1186,49 @@ button:disabled {
     font-size: 12px;
   }
 }
+
+/* ==========================================
+   EVENTIX - SIDEBAR FIJO EN ESCRITORIO
+   ========================================== */
+
+@media (min-width: 851px) {
+
+  .panel-cliente {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    min-height: 100vh;
+  }
+
+  .cliente-sidebar {
+    position: sticky;
+    top: 0;
+    align-self: start;
+
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+
+    box-sizing: border-box;
+    z-index: 50;
+  }
+
+  .sidebar-navegacion {
+    flex-shrink: 0;
+  }
+
+  .sidebar-pie {
+    margin-top: auto;
+    flex-shrink: 0;
+  }
+
+  .cliente-contenido {
+    min-width: 0;
+  }
+}
